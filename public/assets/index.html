@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serenity Cove Resort - Your Private Paradise Awaits</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Serenity Cove</div>
+                <nav class="nav" id="nav">
+                    <a href="#home" class="nav-link">Home</a>
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="#amenities" class="nav-link">Amenities</a>
+                    <a href="#gallery" class="nav-link">Gallery</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                </nav>
+                <button class="cta-button" onclick="openBookingModal()">Book Now</button>
+                <button class="menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">Your Private Paradise</h1>
+            <p class="hero-subtitle">Escape to luxury at our exclusive beachfront resort</p>
+            <button class="hero-cta" onclick="openBookingModal()">Reserve Your Stay</button>
+        </div>
+    </section>
+
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800" alt="Resort exterior">
+                </div>
+                <div class="about-content">
+                    <h2 class="section-title">A Sanctuary of Elegance</h2>
+                    <p class="section-text">Nestled on pristine shores, Serenity Cove offers an unparalleled retreat experience. Our exclusive property combines breathtaking natural beauty with world-class amenities, creating the perfect backdrop for your dream vacation.</p>
+                    <p class="section-text">Wake up to panoramic ocean views, spend your days lounging by the infinity pool, and end each evening with spectacular sunsets from your private terrace. This isn't just a vacation—it's a transformation.</p>
+                    <div class="features-grid">
+                        <div class="feature-item">
+                            <div class="feature-number">6</div>
+                            <div class="feature-label">Bedrooms</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-number">8</div>
+                            <div class="feature-label">Bathrooms</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-number">12</div>
+                            <div class="feature-label">Max Guests</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="amenities" id="amenities">
+        <div class="container">
+            <h2 class="section-title center">Premium Amenities</h2>
+            <p class="section-subtitle">Everything you need for the perfect escape</p>
+            <div class="amenities-grid">
+                <div class="amenity-card">
+                    <div class="amenity-icon">🏊</div>
+                    <h3>Infinity Pool</h3>
+                    <p>Stunning infinity pool with ocean views and poolside bar service</p>
+                </div>
+                <div class="amenity-card">
+                    <div class="amenity-icon">🍽️</div>
+                    <h3>Gourmet Kitchen</h3>
+                    <p>Fully equipped chef's kitchen with premium appliances</p>
+                </div>
+                <div class="amenity-card">
+                    <div class="amenity-icon">🧘</div>
+                    <h3>Spa & Wellness</h3>
+                    <p>Private spa facilities with massage rooms and sauna</p>
+                </div>
+                <div class="amenity-card">
+                    <div class="amenity-icon">🏖️</div>
+                    <h3>Private Beach</h3>
+                    <p>Exclusive beach access with water sports equipment</p>
+                </div>
+                <div class="amenity-card">
+                    <div class="amenity-icon">🎬</div>
+                    <h3>Home Theater</h3>
+                    <p>State-of-the-art cinema room with premium sound system</p>
+                </div>
+                <div class="amenity-card">
+                    <div class="amenity-icon">🏋️</div>
+                    <h3>Fitness Center</h3>
+                    <p>Fully equipped gym with ocean views and personal trainer available</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="gallery" id="gallery">
+        <div class="container">
+            <h2 class="section-title center">Experience Serenity</h2>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600" alt="Resort pool">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600" alt="Bedroom">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=600" alt="Living area">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600" alt="Beach view">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Modal -->
+    <div class="modal" id="bookingModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeBookingModal()">&times;</button>
+            <h2>Reserve Your Stay</h2>
+            <form class="booking-form" id="bookingForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="checkIn">Check-in Date</label>
+                        <input type="date" id="checkIn" name="checkIn" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkOut">Check-out Date</label>
+                        <input type="date" id="checkOut" name="checkOut" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="guests">Number of Guests</label>
+                        <select id="guests" name="guests" required>
+                            <option value="">Select guests</option>
+                            <option value="1">1 Guest</option>
+                            <option value="2">2 Guests</option>
+                            <option value="4">4 Guests</option>
+                            <option value="6">6 Guests</option>
+                            <option value="8">8 Guests</option>
+                            <option value="10">10 Guests</option>
+                            <option value="12">12 Guests</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Special Requests (Optional)</label>
+                    <textarea id="message" name="message" rows="4"></textarea>
+                </div>
+                <button type="submit" class="submit-button">Submit Reservation Request</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h3>Serenity Cove Resort</h3>
+                    <p>Your private paradise awaits. Experience luxury redefined in an exclusive beachfront setting.</p>
+                </div>
+                <div class="footer-column">
+                    <h4>Quick Links</h4>
+                    <a href="#about">About</a>
+                    <a href="#amenities">Amenities</a>
+                    <a href="#gallery">Gallery</a>
+                    <a href="#" onclick="openBookingModal(); return false;">Book Now</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Contact Us</h4>
+                    <p>📍 123 Paradise Bay, Coastal Haven</p>
+                    <p>📞 +1 (555) 123-4567</p>
+                    <p>✉️ info@serenitycove.com</p>
+                </div>
+                <div class="footer-column">
+                    <h4>Follow Us</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-link">Facebook</a>
+                        <a href="#" class="social-link">Instagram</a>
+                        <a href="#" class="social-link">Twitter</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Serenity Cove Resort. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>
