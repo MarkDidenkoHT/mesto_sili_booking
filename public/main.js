@@ -85,9 +85,86 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+const checkInInput = document.getElementById('checkIn');
+const checkOutInput = document.getElementById('checkOut');
+const todayDate = new Date().toISOString().split('T')[0];
+checkInInput.setAttribute('min', todayDate);
+
+let bookedDates = [];
+
+// Fetch booked dates on page load
+async function loadBookedDates() {
+    try {
+        const response = await fetch('/api/booked-dates');
+        if (!response.ok) throw new Error('Failed to fetch booked dates');
+        const data = await response.json();
+        bookedDates = data.bookedDates;
+        updateDisabledDates();
+    } catch (error) {
+        console.error('Error loading booked dates:', error);
+    }
+}
+
+function isDateBooked(dateStr) {
+    const checkDate = new Date(dateStr);
+    return bookedDates.some(booking => {
+        const bookCheckIn = new Date(booking.checkIn);
+        const bookCheckOut = new Date(booking.checkOut);
+        return checkDate >= bookCheckIn && checkDate < bookCheckOut;
+    });
+}
+
+function updateDisabledDates() {
+    const today = new Date();
+    const maxDate = new Date();
+    maxDate.setFullYear(maxDate.getFullYear() + 1);
+    
+    let currentDate = new Date(today);
+    const disabledDates = [];
+    
+    while (currentDate <= maxDate) {
+        if (isDateBooked(currentDate.toISOString().split('T')[0])) {
+            disabledDates.push(currentDate.toISOString().split('T')[0]);
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // Apply disabled dates to inputs
+    checkInInput.addEventListener('input', function() {
+        if (isDateBooked(this.value)) {
+            this.classList.add('booked');
+            this.title = 'This date is already booked';
+        } else {
+            this.classList.remove('booked');
+            this.title = '';
+        }
+    });
+    
+    checkOutInput.addEventListener('input', function() {
+        if (isDateBooked(this.value)) {
+            this.classList.add('booked');
+            this.title = 'This date is already booked';
+        } else {
+            this.classList.remove('booked');
+            this.title = '';
+        }
+    });
+}
+
+checkInInput.addEventListener('change', () => {
+    const checkInDate = new Date(checkInInput.value);
+    checkInDate.setDate(checkInDate.getDate() + 1);
+    const minCheckOut = checkInDate.toISOString().split('T')[0];
+    checkOutInput.setAttribute('min', minCheckOut);
+    
+    if (checkOutInput.value && new Date(checkOutInput.value) <= new Date(checkInInput.value)) {
+        checkOutInput.value = '';
+    }
+});
+
 const bookingForm = document.getElementById('bookingForm');
 
-bookingForm.addEventListener('submit', (e) => {
+bookingForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const formData = new FormData(bookingForm);
@@ -106,29 +183,47 @@ bookingForm.addEventListener('submit', (e) => {
         alert('Дата выезда должна быть позже даты заезда');
         return;
     }
+
+    // Check if any date in range is booked
+    for (let d = new Date(checkIn); d < checkOut; d.setDate(d.getDate() + 1)) {
+        if (isDateBooked(d.toISOString().split('T')[0])) {
+            alert('Одна или несколько выбранных дат уже забронированы. Пожалуйста, выберите другие даты.');
+            return;
+        }
+    }
     
     const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
 
-    alert(`Спасибо за вашу заявку на бронирование!\n\nДетали:\nЗаезд: ${data.checkIn}\nВыезд: ${data.checkOut}\nНочей: ${nights}\nГостей: ${data.guests}\n\nМы свяжемся с вами по номеру ${data.phone} в течение 24 часов для подтверждения бронирования.`);
+    try {
+        const response = await fetch('/api/bookings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
 
-    bookingForm.reset();
-    closeBookingModal();
+        if (!response.ok) {
+            const error = await response.json();
+            alert('Ошибка: ' + (error.error || 'Не удалось создать бронирование'));
+            return;
+        }
+
+        alert(`Спасибо за вашу заявку на бронирование!\n\nДетали:\nЗаезд: ${data.checkIn}\nВыезд: ${data.checkOut}\nНочей: ${nights}\nГостей: ${data.guests}\n\nМы свяжемся с вами по номеру ${data.phone} в течение 24 часов для подтверждения бронирования.`);
+
+        bookingForm.reset();
+        closeBookingModal();
+        loadBookedDates();
+    } catch (error) {
+        console.error('Booking error:', error);
+        alert('Ошибка при отправке бронирования. Пожалуйста, попробуйте позже.');
+    }
 });
 
-const checkInInput = document.getElementById('checkIn');
-const checkOutInput = document.getElementById('checkOut');
-const todayDate = new Date().toISOString().split('T')[0];
-checkInInput.setAttribute('min', todayDate);
-
-checkInInput.addEventListener('change', () => {
-    const checkInDate = new Date(checkInInput.value);
-    checkInDate.setDate(checkInDate.getDate() + 1);
-    const minCheckOut = checkInDate.toISOString().split('T')[0];
-    checkOutInput.setAttribute('min', minCheckOut);
-    
-    if (checkOutInput.value && new Date(checkOutInput.value) <= new Date(checkInInput.value)) {
-        checkOutInput.value = '';
-    }
+// Load booked dates on page load
+window.addEventListener('load', () => {
+    loadBookedDates();
+    initSwiper();
 });
 
 const images = document.querySelectorAll('img[src]');
