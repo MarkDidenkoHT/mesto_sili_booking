@@ -52,8 +52,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/config', (req, res) => {
+    console.log('Config request received');
+    const apiKey = process.env.WEGLOT_API_KEY;
+    console.log('WEGLOT_API_KEY available:', !!apiKey);
+    if (apiKey) {
+        console.log('API Key found:', apiKey.substring(0, 10) + '...');
+    }
     res.json({
-        weglotApiKey: process.env.WEGLOT_API_KEY || null
+        weglotApiKey: apiKey || null
     });
 });
 
@@ -67,4 +73,5 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    console.log('Environment variables loaded:', !!process.env.WEGLOT_API_KEY);
 });

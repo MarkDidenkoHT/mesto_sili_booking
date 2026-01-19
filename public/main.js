@@ -178,24 +178,49 @@ fetch('/api/config')
         return response.json();
     })
     .then(config => {
+        console.log('Config received:', config);
+        console.log('Weglot object available:', typeof window.Weglot);
+        
         if (config.weglotApiKey) {
+            console.log('API Key found:', config.weglotApiKey.substring(0, 10) + '...');
+            
             if (typeof window.Weglot !== 'undefined') {
+                console.log('Weglot library loaded, initializing...');
+                
                 Weglot.initialize({
-                    api_key: config.weglotApiKey,
-                    switcher_type: 'inline'
+                    api_key: config.weglotApiKey
                 });
                 
-                const weglotContainer = document.querySelector('.weglot-container');
-                if (weglotContainer && window.Weglot) {
-                    weglotContainer.innerHTML = '<div class="wg-inline"></div>';
-                    if (window.Weglot.initialize) {
-                        window.Weglot.initialize({
-                            api_key: config.weglotApiKey,
-                            switcher_type: 'inline'
+                console.log('Weglot initialized');
+                
+                setTimeout(() => {
+                    console.log('Checking for Weglot UI...');
+                    const weglotUI = document.querySelector('.wg-drop');
+                    console.log('Weglot UI element:', weglotUI);
+                    
+                    if (weglotUI) {
+                        console.log('Weglot UI found, moving to container');
+                        const container = document.querySelector('.weglot-container');
+                        if (container) {
+                            container.appendChild(weglotUI);
+                            console.log('Weglot moved to container');
+                        }
+                    } else {
+                        console.log('Weglot UI not found, checking DOM...');
+                        const allElements = document.querySelectorAll('[class*="wg"]');
+                        console.log('Found elements with wg class:', allElements.length);
+                        allElements.forEach((el, i) => {
+                            console.log(`Element ${i}:`, el.className, el);
                         });
                     }
-                }
+                }, 1000);
+            } else {
+                console.error('Weglot library not loaded');
             }
+        } else {
+            console.warn('No API Key provided');
         }
     })
-    .catch(error => console.error('Config loading error:', error));
+    .catch(error => {
+        console.error('Config loading error:', error);
+    });
