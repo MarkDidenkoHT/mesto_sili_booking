@@ -507,6 +507,22 @@ body {
     color: #999;
 }
 
+.weglot-container {
+    display: flex;
+    align-items: center;
+}
+
+.wg-flags {
+    display: flex;
+    gap: 8px;
+}
+
+.wg-flags .wg-flag {
+    cursor: pointer;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
 @media (max-width: 968px) {
     .nav {
         position: fixed;

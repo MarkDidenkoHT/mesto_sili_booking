@@ -178,10 +178,24 @@ fetch('/api/config')
         return response.json();
     })
     .then(config => {
-        if (config.weglotApiKey && typeof window.Weglot !== 'undefined') {
-            Weglot.initialize({
-                api_key: config.weglotApiKey
-            });
+        if (config.weglotApiKey) {
+            if (typeof window.Weglot !== 'undefined') {
+                Weglot.initialize({
+                    api_key: config.weglotApiKey,
+                    switcher_type: 'inline'
+                });
+                
+                const weglotContainer = document.querySelector('.weglot-container');
+                if (weglotContainer && window.Weglot) {
+                    weglotContainer.innerHTML = '<div class="wg-inline"></div>';
+                    if (window.Weglot.initialize) {
+                        window.Weglot.initialize({
+                            api_key: config.weglotApiKey,
+                            switcher_type: 'inline'
+                        });
+                    }
+                }
+            }
         }
     })
     .catch(error => console.error('Config loading error:', error));
