@@ -31,6 +31,7 @@ app.use(helmet({
             ],
             fontSrc: [
                 "'self'", 
+                "data:",
                 "https://fonts.gstatic.com",
                 "https://cdn.weglot.com"
             ],
