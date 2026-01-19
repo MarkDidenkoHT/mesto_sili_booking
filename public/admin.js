@@ -1,10 +1,21 @@
+console.log('[ADMIN-JS] Script loaded');
+
 let token = localStorage.getItem('adminToken');
+console.log('[ADMIN-JS] Token from localStorage:', token ? 'exists' : 'not found');
 
 const loginPage = document.getElementById('loginPage');
 const dashboardPage = document.getElementById('dashboardPage');
 const loginForm = document.getElementById('loginForm');
 const logoutBtn = document.getElementById('logoutBtn');
 const loginError = document.getElementById('loginError');
+
+console.log('[ADMIN-JS] DOM elements check:', {
+    loginPage: !!loginPage,
+    dashboardPage: !!dashboardPage,
+    loginForm: !!loginForm,
+    logoutBtn: !!logoutBtn,
+    loginError: !!loginError
+});
 
 const yearFilter = document.getElementById('yearFilter');
 const monthFilter = document.getElementById('monthFilter');
@@ -19,22 +30,35 @@ const modalTitle = document.getElementById('modalTitle');
 const modalClose = document.getElementById('modalClose');
 const modalCancelBtn = document.getElementById('modalCancelBtn');
 
+console.log('[ADMIN-JS] Filter elements check:', {
+    yearFilter: !!yearFilter,
+    monthFilter: !!monthFilter,
+    statusFilter: !!statusFilter,
+    applyFiltersBtn: !!applyFiltersBtn,
+    addBookingBtn: !!addBookingBtn,
+    bookingsBody: !!bookingsBody
+});
+
 let currentBookingId = null;
 
 // Check if already logged in
 if (token) {
+    console.log('[ADMIN-JS] User already logged in, showing dashboard');
     showDashboard();
 } else {
+    console.log('[ADMIN-JS] User not logged in, showing login form');
     showLogin();
 }
 
 function showLogin() {
+    console.log('[ADMIN-JS] Showing login page');
     loginPage.style.display = 'flex';
     dashboardPage.style.display = 'none';
     token = null;
 }
 
 function showDashboard() {
+    console.log('[ADMIN-JS] Showing dashboard');
     loginPage.style.display = 'none';
     dashboardPage.style.display = 'block';
     populateYearFilter();
@@ -48,6 +72,7 @@ loginForm.addEventListener('submit', async (e) => {
     const login = document.getElementById('login').value;
     const password = document.getElementById('password').value;
     
+    console.log('[ADMIN-JS] Login attempt:', login);
     loginError.classList.remove('show');
     
     try {
@@ -57,17 +82,21 @@ loginForm.addEventListener('submit', async (e) => {
             body: JSON.stringify({ login, password })
         });
         
+        console.log('[ADMIN-JS] Login response status:', response.status);
+        
         if (!response.ok) {
             throw new Error('Invalid credentials');
         }
         
         const data = await response.json();
+        console.log('[ADMIN-JS] Login successful, token received');
         token = data.token;
         localStorage.setItem('adminToken', token);
         
         loginForm.reset();
         showDashboard();
     } catch (error) {
+        console.error('[ADMIN-JS] Login error:', error);
         loginError.textContent = 'Ошибка: ' + error.message;
         loginError.classList.add('show');
     }
@@ -75,12 +104,14 @@ loginForm.addEventListener('submit', async (e) => {
 
 // Logout
 logoutBtn.addEventListener('click', () => {
+    console.log('[ADMIN-JS] Logout clicked');
     localStorage.removeItem('adminToken');
     showLogin();
 });
 
 // Populate year filter
 function populateYearFilter() {
+    console.log('[ADMIN-JS] Populating year filter');
     const currentYear = new Date().getFullYear();
     for (let i = currentYear; i <= currentYear + 2; i++) {
         const option = document.createElement('option');
@@ -93,28 +124,35 @@ function populateYearFilter() {
 // Load bookings
 async function loadBookings() {
     try {
+        console.log('[ADMIN-JS] Loading bookings...');
         const params = new URLSearchParams();
         
         if (yearFilter.value) params.append('year', yearFilter.value);
         if (monthFilter.value) params.append('month', monthFilter.value);
         if (statusFilter.value !== '') params.append('confirmed', statusFilter.value);
         
+        console.log('[ADMIN-JS] Filter params:', params.toString());
+        
         const response = await fetch(`/api/admin/bookings?${params}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
+        console.log('[ADMIN-JS] Bookings response status:', response.status);
+        
         if (!response.ok) throw new Error('Failed to load bookings');
         
         const data = await response.json();
+        console.log('[ADMIN-JS] Bookings loaded:', data.bookings.length);
         renderBookings(data.bookings);
     } catch (error) {
-        console.error('Error loading bookings:', error);
+        console.error('[ADMIN-JS] Error loading bookings:', error);
         alert('Ошибка загрузки бронирований');
     }
 }
 
 // Render bookings
 function renderBookings(bookings) {
+    console.log('[ADMIN-JS] Rendering', bookings.length, 'bookings');
     bookingsBody.innerHTML = '';
     
     if (bookings.length === 0) {
@@ -152,6 +190,7 @@ applyFiltersBtn.addEventListener('click', loadBookings);
 
 // Add booking
 addBookingBtn.addEventListener('click', () => {
+    console.log('[ADMIN-JS] Add booking clicked');
     currentBookingId = null;
     modalTitle.textContent = 'Добавить бронирование';
     bookingForm.reset();
@@ -161,9 +200,12 @@ addBookingBtn.addEventListener('click', () => {
 // Edit booking
 async function editBooking(id) {
     try {
+        console.log('[ADMIN-JS] Edit booking:', id);
         const response = await fetch(`/api/admin/bookings/${id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
+        
+        console.log('[ADMIN-JS] Edit response status:', response.status);
         
         if (!response.ok) throw new Error('Failed to load booking');
         
@@ -184,13 +226,14 @@ async function editBooking(id) {
         
         bookingModal.classList.add('active');
     } catch (error) {
-        console.error('Error loading booking:', error);
+        console.error('[ADMIN-JS] Error loading booking:', error);
         alert('Ошибка загрузки бронирования');
     }
 }
 
 // Delete booking
 async function deleteBooking(id) {
+    console.log('[ADMIN-JS] Delete booking:', id);
     if (!confirm('Вы уверены, что хотите удалить это бронирование?')) {
         return;
     }
@@ -201,11 +244,13 @@ async function deleteBooking(id) {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
+        console.log('[ADMIN-JS] Delete response status:', response.status);
+        
         if (!response.ok) throw new Error('Failed to delete booking');
         
         loadBookings();
     } catch (error) {
-        console.error('Error deleting booking:', error);
+        console.error('[ADMIN-JS] Error deleting booking:', error);
         alert('Ошибка удаления бронирования');
     }
 }
@@ -213,6 +258,8 @@ async function deleteBooking(id) {
 // Save booking
 bookingForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    console.log('[ADMIN-JS] Saving booking, currentBookingId:', currentBookingId);
     
     const formData = new FormData(bookingForm);
     const data = {
@@ -232,6 +279,8 @@ bookingForm.addEventListener('submit', async (e) => {
             ? `/api/admin/bookings/${currentBookingId}`
             : '/api/admin/bookings';
         
+        console.log('[ADMIN-JS] Save request:', method, url);
+        
         const response = await fetch(url, {
             method: method,
             headers: {
@@ -241,27 +290,35 @@ bookingForm.addEventListener('submit', async (e) => {
             body: JSON.stringify(data)
         });
         
+        console.log('[ADMIN-JS] Save response status:', response.status);
+        
         if (!response.ok) throw new Error('Failed to save booking');
         
+        console.log('[ADMIN-JS] Booking saved successfully');
         bookingModal.classList.remove('active');
         loadBookings();
     } catch (error) {
-        console.error('Error saving booking:', error);
+        console.error('[ADMIN-JS] Error saving booking:', error);
         alert('Ошибка сохранения бронирования');
     }
 });
 
 // Modal controls
 modalClose.addEventListener('click', () => {
+    console.log('[ADMIN-JS] Modal close clicked');
     bookingModal.classList.remove('active');
 });
 
 modalCancelBtn.addEventListener('click', () => {
+    console.log('[ADMIN-JS] Modal cancel clicked');
     bookingModal.classList.remove('active');
 });
 
 bookingModal.addEventListener('click', (e) => {
     if (e.target === bookingModal) {
+        console.log('[ADMIN-JS] Modal background clicked');
         bookingModal.classList.remove('active');
     }
 });
+
+console.log('[ADMIN-JS] Initialization complete');

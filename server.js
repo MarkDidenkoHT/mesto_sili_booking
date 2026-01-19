@@ -12,6 +12,8 @@ const { generateToken, authMiddleware } = require('./auth');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+console.log('[SERVER] Initializing server...');
+
 // Rate limiting for booking endpoint
 const bookingLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -70,25 +72,38 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Explicitly serve admin.html
+app.get('/admin.html', (req, res) => {
+    console.log('[ADMIN] Admin panel requested');
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.get('/admin', (req, res) => {
+    console.log('[ADMIN] Admin redirect requested');
+    res.redirect('/admin.html');
+});
+
 // Public endpoints
 app.get('/api/config', (req, res) => {
-    console.log('Config request received');
+    console.log('[API] Config request received');
     const apiKey = process.env.WEGLOT_API_KEY;
     res.json({ weglotApiKey: apiKey || null });
 });
 
 app.get('/api/booked-dates', async (req, res) => {
     try {
+        console.log('[API] Booked dates requested');
         const bookedDates = await getBookedDates();
         res.json({ bookedDates });
     } catch (error) {
-        console.error('Error fetching booked dates:', error);
+        console.error('[API] Error fetching booked dates:', error);
         res.status(500).json({ error: 'Failed to fetch booked dates' });
     }
 });
 
 app.post('/api/bookings', bookingLimiter, async (req, res) => {
     try {
+        console.log('[API] New booking submission:', { name: req.body.name, email: req.body.email });
         const { name, email, phone, checkIn, checkOut, guests, message } = req.body;
 
         if (!name || !email || !phone || !checkIn || !checkOut || !guests) {
@@ -127,31 +142,37 @@ app.post('/api/bookings', bookingLimiter, async (req, res) => {
             message: message ? message.substring(0, 500) : null
         });
 
+        console.log('[API] Booking created:', result.id);
         res.json({ success: true, bookingId: result.id, message: 'Booking created successfully' });
     } catch (error) {
-        console.error('Error creating booking:', error);
+        console.error('[API] Error creating booking:', error);
         res.status(500).json({ error: 'Failed to create booking' });
     }
 });
 
 // Admin endpoints
 app.post('/api/admin/login', loginLimiter, (req, res) => {
+    console.log('[ADMIN] Login attempt:', req.body.login);
     const { login, password } = req.body;
 
     if (!login || !password) {
+        console.log('[ADMIN] Login failed: missing credentials');
         return res.status(400).json({ error: 'Missing login or password' });
     }
 
     if (login === process.env.ADMIN_LOGIN && password === process.env.ADMIN_PASSWORD) {
+        console.log('[ADMIN] Login successful for:', login);
         const token = generateToken({ admin: true });
         res.json({ success: true, token });
     } else {
+        console.log('[ADMIN] Login failed: invalid credentials');
         res.status(401).json({ error: 'Invalid credentials' });
     }
 });
 
 app.get('/api/admin/bookings', authMiddleware, async (req, res) => {
     try {
+        console.log('[ADMIN] Bookings requested with filters:', req.query);
         const { year, month, confirmed } = req.query;
         const filters = {};
 
@@ -160,32 +181,37 @@ app.get('/api/admin/bookings', authMiddleware, async (req, res) => {
         if (confirmed !== undefined) filters.confirmed = confirmed === 'true';
 
         const bookings = await getAllBookings(filters);
+        console.log('[ADMIN] Bookings fetched:', bookings.length);
         res.json({ bookings });
     } catch (error) {
-        console.error('Error fetching bookings:', error);
+        console.error('[ADMIN] Error fetching bookings:', error);
         res.status(500).json({ error: 'Failed to fetch bookings' });
     }
 });
 
 app.get('/api/admin/bookings/:id', authMiddleware, async (req, res) => {
     try {
+        console.log('[ADMIN] Booking requested:', req.params.id);
         const booking = await getBookingById(req.params.id);
         if (!booking) {
+            console.log('[ADMIN] Booking not found:', req.params.id);
             return res.status(404).json({ error: 'Booking not found' });
         }
         res.json({ booking });
     } catch (error) {
-        console.error('Error fetching booking:', error);
+        console.error('[ADMIN] Error fetching booking:', error);
         res.status(500).json({ error: 'Failed to fetch booking' });
     }
 });
 
 app.put('/api/admin/bookings/:id', authMiddleware, async (req, res) => {
     try {
+        console.log('[ADMIN] Booking update requested:', req.params.id);
         const { name, email, phone, checkIn, checkOut, guests, message, confirmed } = req.body;
         const booking = await getBookingById(req.params.id);
 
         if (!booking) {
+            console.log('[ADMIN] Booking not found for update:', req.params.id);
             return res.status(404).json({ error: 'Booking not found' });
         }
 
@@ -200,37 +226,44 @@ app.put('/api/admin/bookings/:id', authMiddleware, async (req, res) => {
         if (confirmed !== undefined) updateData.confirmed = confirmed;
 
         const result = await updateBooking(req.params.id, updateData);
+        console.log('[ADMIN] Booking updated:', req.params.id);
         res.json({ success: true, message: 'Booking updated successfully' });
     } catch (error) {
-        console.error('Error updating booking:', error);
+        console.error('[ADMIN] Error updating booking:', error);
         res.status(500).json({ error: 'Failed to update booking' });
     }
 });
 
 app.delete('/api/admin/bookings/:id', authMiddleware, async (req, res) => {
     try {
+        console.log('[ADMIN] Booking delete requested:', req.params.id);
         const booking = await getBookingById(req.params.id);
         if (!booking) {
+            console.log('[ADMIN] Booking not found for delete:', req.params.id);
             return res.status(404).json({ error: 'Booking not found' });
         }
 
         await deleteBooking(req.params.id);
+        console.log('[ADMIN] Booking deleted:', req.params.id);
         res.json({ success: true, message: 'Booking deleted successfully' });
     } catch (error) {
-        console.error('Error deleting booking:', error);
+        console.error('[ADMIN] Error deleting booking:', error);
         res.status(500).json({ error: 'Failed to delete booking' });
     }
 });
 
 app.get('/', (req, res) => {
+    console.log('[SERVER] Home page requested');
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('*', (req, res) => {
+    console.log('[SERVER] 404 - Path not found:', req.path);
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-    console.log('Environment variables loaded:', !!process.env.WEGLOT_API_KEY);
+    console.log(`[SERVER] ✓ Server running on http://localhost:${PORT}`);
+    console.log('[SERVER] ✓ Environment variables loaded:', !!process.env.WEGLOT_API_KEY);
+    console.log('[SERVER] ✓ Admin login:', process.env.ADMIN_LOGIN);
 });
