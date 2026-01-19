@@ -98,22 +98,21 @@ bookingForm.addEventListener('submit', (e) => {
     today.setHours(0, 0, 0, 0);
     
     if (checkIn < today) {
-        alert('Check-in date cannot be in the past');
+        alert('Дата заезда не может быть в прошлом');
         return;
     }
     
     if (checkOut <= checkIn) {
-        alert('Check-out date must be after check-in date');
+        alert('Дата выезда должна быть позже даты заезда');
         return;
     }
     
     const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
 
-    alert(`Thank you for your reservation request!\n\nDetails:\nCheck-in: ${data.checkIn}\nCheck-out: ${data.checkOut}\nNights: ${nights}\nGuests: ${data.guests}\n\nWe will contact you at ${data.email} within 24 hours to confirm your booking.`);
+    alert(`Спасибо за вашу заявку на бронирование!\n\nДетали:\nЗаезд: ${data.checkIn}\nВыезд: ${data.checkOut}\nНочей: ${nights}\nГостей: ${data.guests}\n\nМы свяжемся с вами по номеру ${data.phone} в течение 24 часов для подтверждения бронирования.`);
 
     bookingForm.reset();
     closeBookingModal();
-    console.log('Booking data:', data);
 });
 
 const checkInInput = document.getElementById('checkIn');
@@ -178,40 +177,20 @@ fetch('/api/config')
         return response.json();
     })
     .then(config => {
-        console.log('Config received:', config);
-        console.log('Weglot object available:', typeof window.Weglot);
-        
         if (config.weglotApiKey) {
-            console.log('API Key found:', config.weglotApiKey.substring(0, 10) + '...');
-            
             if (typeof window.Weglot !== 'undefined') {
-                console.log('Weglot library loaded, initializing...');
-                
                 Weglot.initialize({
                     api_key: config.weglotApiKey
                 });
                 
-                console.log('Weglot initialized');
-                
                 setTimeout(() => {
-                    console.log('Checking for Weglot UI...');
                     const weglotUI = document.querySelector('.wg-drop');
-                    console.log('Weglot UI element:', weglotUI);
                     
                     if (weglotUI) {
-                        console.log('Weglot UI found, moving to container');
                         const container = document.querySelector('.weglot-container');
                         if (container) {
                             container.appendChild(weglotUI);
-                            console.log('Weglot moved to container');
                         }
-                    } else {
-                        console.log('Weglot UI not found, checking DOM...');
-                        const allElements = document.querySelectorAll('[class*="wg"]');
-                        console.log('Found elements with wg class:', allElements.length);
-                        allElements.forEach((el, i) => {
-                            console.log(`Element ${i}:`, el.className, el);
-                        });
                     }
                 }, 1000);
             } else {
