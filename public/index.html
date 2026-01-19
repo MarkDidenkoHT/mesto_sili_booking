@@ -18,7 +18,7 @@
                     <a href="#gallery" class="nav-link">Gallery</a>
                     <a href="#contact" class="nav-link">Contact</a>
                 </nav>
-                <button class="cta-button" onclick="openBookingModal()">Book Now</button>
+                <button class="cta-button" id="headerBookBtn">Book Now</button>
                 <button class="menu-toggle" id="menuToggle">
                     <span></span>
                     <span></span>
@@ -33,7 +33,7 @@
         <div class="hero-content">
             <h1 class="hero-title">Your Private Paradise</h1>
             <p class="hero-subtitle">Escape to luxury at our exclusive beachfront resort</p>
-            <button class="hero-cta" onclick="openBookingModal()">Reserve Your Stay</button>
+            <button class="hero-cta" id="heroBookBtn">Reserve Your Stay</button>
         </div>
     </section>
 
@@ -128,7 +128,7 @@
     <!-- Booking Modal -->
     <div class="modal" id="bookingModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeBookingModal()">&times;</button>
+            <button class="modal-close" id="modalClose">&times;</button>
             <h2>Reserve Your Stay</h2>
             <form class="booking-form" id="bookingForm">
                 <div class="form-row">
@@ -190,7 +190,7 @@
                     <a href="#about">About</a>
                     <a href="#amenities">Amenities</a>
                     <a href="#gallery">Gallery</a>
-                    <a href="#" onclick="openBookingModal(); return false;">Book Now</a>
+                    <a href="#" id="footerBookBtn">Book Now</a>
                 </div>
                 <div class="footer-column">
                     <h4>Contact Us</h4>

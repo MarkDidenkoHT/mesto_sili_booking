@@ -49,6 +49,10 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 const modal = document.getElementById('bookingModal');
+const headerBookBtn = document.getElementById('headerBookBtn');
+const heroBookBtn = document.getElementById('heroBookBtn');
+const footerBookBtn = document.getElementById('footerBookBtn');
+const modalClose = document.getElementById('modalClose');
 
 function openBookingModal() {
     modal.classList.add('active');
@@ -59,6 +63,15 @@ function closeBookingModal() {
     modal.classList.remove('active');
     document.body.style.overflow = 'auto';
 }
+
+headerBookBtn.addEventListener('click', openBookingModal);
+heroBookBtn.addEventListener('click', openBookingModal);
+footerBookBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    openBookingModal();
+});
+
+modalClose.addEventListener('click', closeBookingModal);
 
 modal.addEventListener('click', (e) => {
     if (e.target === modal) {
@@ -125,7 +138,7 @@ const imageObserver = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             const img = entry.target;
-            img.src = img.src; // Trigger load
+            img.src = img.src;
             observer.unobserve(img);
         }
     });
