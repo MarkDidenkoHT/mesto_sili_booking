@@ -19,7 +19,8 @@ app.use(helmet({
                 "https://cdnjs.cloudflare.com", 
                 "https://telegram.org", 
                 "https://esm.sh",
-                "https://cdn.weglot.com"
+                "https://cdn.weglot.com",
+                "https://api.weglot.com" 
             ],
             styleSrc: [
                 "'self'", 
