@@ -20,7 +20,7 @@ let lastScroll = 0;
 window.addEventListener('scroll', () => {
     const currentScroll = window.pageYOffset;
     
-    if (currentScroll > 100) {
+    if (currentScroll > 80) {
         header.classList.add('scrolled');
     } else {
         header.classList.remove('scrolled');
@@ -117,8 +117,8 @@ bookingForm.addEventListener('submit', (e) => {
 
 const checkInInput = document.getElementById('checkIn');
 const checkOutInput = document.getElementById('checkOut');
-const today = new Date().toISOString().split('T')[0];
-checkInInput.setAttribute('min', today);
+const todayDate = new Date().toISOString().split('T')[0];
+checkInInput.setAttribute('min', todayDate);
 
 checkInInput.addEventListener('change', () => {
     const checkInDate = new Date(checkInInput.value);
@@ -137,7 +137,9 @@ const imageObserver = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             const img = entry.target;
-            img.src = img.src;
+            if (img.dataset.src) {
+                img.src = img.dataset.src;
+            }
             observer.unobserve(img);
         }
     });
@@ -146,12 +148,15 @@ const imageObserver = new IntersectionObserver((entries, observer) => {
 });
 
 images.forEach(img => {
+    if (!img.loading) {
+        img.loading = 'lazy';
+    }
     imageObserver.observe(img);
 });
 
 const observerOptions = {
     threshold: 0.1,
-    rootMargin: '0px 0px -100px 0px'
+    rootMargin: '0px 0px -50px 0px'
 };
 
 const sectionObserver = new IntersectionObserver((entries) => {
@@ -166,10 +171,142 @@ const sectionObserver = new IntersectionObserver((entries) => {
 const sections = document.querySelectorAll('.about, .amenities, .gallery');
 sections.forEach(section => {
     section.style.opacity = '0';
-    section.style.transform = 'translateY(30px)';
+    section.style.transform = 'translateY(20px)';
     section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
     sectionObserver.observe(section);
 });
+
+const lightbox = document.getElementById('lightbox');
+const lightboxImage = document.getElementById('lightboxImage');
+const lightboxCaption = document.getElementById('lightboxCaption');
+const lightboxClose = document.getElementById('lightboxClose');
+const lightboxPrev = document.getElementById('lightboxPrev');
+const lightboxNext = document.getElementById('lightboxNext');
+
+let currentImageIndex = 0;
+const galleryImages = [
+    {
+        src: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1200',
+        alt: 'Территория глэмпинга'
+    },
+    {
+        src: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200',
+        alt: 'Интерьер глэмпинга'
+    },
+    {
+        src: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1200',
+        alt: 'Общая зона'
+    },
+    {
+        src: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1200',
+        alt: 'Природный ландшафт'
+    },
+    {
+        src: 'https://images.unsplash.com/photo-1504851149312-7a075b496cc7?w=1200',
+        alt: 'Внутреннее убранство'
+    },
+    {
+        src: 'https://images.unsplash.com/photo-1464207687429-7505649dae38?w=1200',
+        alt: 'Вечерний вид'
+    }
+];
+
+function openLightbox(index) {
+    currentImageIndex = index;
+    updateLightbox();
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+function updateLightbox() {
+    const image = galleryImages[currentImageIndex];
+    lightboxImage.src = image.src;
+    lightboxImage.alt = image.alt;
+    lightboxCaption.textContent = image.alt;
+}
+
+function showNextImage() {
+    currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
+    updateLightbox();
+}
+
+function showPrevImage() {
+    currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+    updateLightbox();
+}
+
+document.querySelectorAll('.desktop-gallery .gallery-item').forEach((item, index) => {
+    item.addEventListener('click', () => {
+        openLightbox(index);
+    });
+});
+
+document.querySelectorAll('.mobile-swiper .swiper-slide img').forEach((img, index) => {
+    img.addEventListener('click', () => {
+        openLightbox(index);
+    });
+});
+
+lightboxClose.addEventListener('click', closeLightbox);
+lightboxNext.addEventListener('click', showNextImage);
+lightboxPrev.addEventListener('click', showPrevImage);
+
+lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox) {
+        closeLightbox();
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (lightbox.classList.contains('active')) {
+        if (e.key === 'Escape') {
+            closeLightbox();
+        } else if (e.key === 'ArrowRight') {
+            showNextImage();
+        } else if (e.key === 'ArrowLeft') {
+            showPrevImage();
+        }
+    }
+});
+
+let mobileSwiper = null;
+
+function initSwiper() {
+    if (window.innerWidth <= 768) {
+        if (!mobileSwiper) {
+            mobileSwiper = new Swiper('.mobile-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 10,
+                loop: true,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+            });
+        }
+    } else {
+        if (mobileSwiper) {
+            mobileSwiper.destroy();
+            mobileSwiper = null;
+        }
+    }
+}
+
+window.addEventListener('load', initSwiper);
+window.addEventListener('resize', initSwiper);
 
 fetch('/api/config')
     .then(response => {
