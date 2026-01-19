@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 const fetch = require('node-fetch');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,7 +52,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/config', (req, res) => {
     res.json({
-        weglotApiKey: process.env.WEGLOT_API_KEY
+        weglotApiKey: process.env.WEGLOT_API_KEY || null
     });
 });
 

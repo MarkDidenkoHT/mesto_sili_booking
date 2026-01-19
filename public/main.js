@@ -173,9 +173,12 @@ sections.forEach(section => {
 });
 
 fetch('/api/config')
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error('Config fetch failed');
+        return response.json();
+    })
     .then(config => {
-        if (config.weglotApiKey && window.Weglot) {
+        if (config.weglotApiKey && typeof window.Weglot !== 'undefined') {
             Weglot.initialize({
                 api_key: config.weglotApiKey
             });
