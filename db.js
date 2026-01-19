@@ -22,8 +22,9 @@ function initializeDatabase() {
             checkOut TEXT NOT NULL,
             guests INTEGER NOT NULL,
             message TEXT,
+            confirmed INTEGER DEFAULT 0,
             createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-            status TEXT DEFAULT 'pending'
+            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `, (err) => {
         if (err) {
@@ -37,8 +38,8 @@ function initializeDatabase() {
 function addBooking(bookingData) {
     return new Promise((resolve, reject) => {
         db.run(
-            `INSERT INTO bookings (name, email, phone, checkIn, checkOut, guests, message) 
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO bookings (name, email, phone, checkIn, checkOut, guests, message, confirmed) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
             [
                 bookingData.name,
                 bookingData.email,
@@ -59,17 +60,11 @@ function addBooking(bookingData) {
     });
 }
 
-function getBookedDates(startDate, endDate) {
+function getBookedDates() {
     return new Promise((resolve, reject) => {
         db.all(
             `SELECT checkIn, checkOut FROM bookings 
-             WHERE status = 'pending' OR status = 'confirmed'
-             AND (
-                (checkIn <= ? AND checkOut > ?)
-                OR (checkIn < ? AND checkOut >= ?)
-                OR (checkIn >= ? AND checkOut <= ?)
-             )`,
-            [endDate, startDate, endDate, startDate, startDate, endDate],
+             WHERE confirmed = 1`,
             (err, rows) => {
                 if (err) {
                     reject(err);
@@ -81,19 +76,117 @@ function getBookedDates(startDate, endDate) {
     });
 }
 
-function getAllBookedDates() {
+function getAllBookings(filters = {}) {
     return new Promise((resolve, reject) => {
-        db.all(
-            `SELECT checkIn, checkOut FROM bookings 
-             WHERE status = 'pending' OR status = 'confirmed'`,
-            (err, rows) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(rows || []);
-                }
+        let query = 'SELECT * FROM bookings WHERE 1=1';
+        const params = [];
+
+        if (filters.year) {
+            query += ' AND strftime("%Y", checkIn) = ?';
+            params.push(filters.year.toString());
+        }
+
+        if (filters.month) {
+            query += ' AND strftime("%m", checkIn) = ?';
+            params.push(String(filters.month).padStart(2, '0'));
+        }
+
+        if (filters.confirmed !== undefined) {
+            query += ' AND confirmed = ?';
+            params.push(filters.confirmed ? 1 : 0);
+        }
+
+        query += ' ORDER BY checkIn DESC';
+
+        db.all(query, params, (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(rows || []);
             }
-        );
+        });
+    });
+}
+
+function getBookingById(id) {
+    return new Promise((resolve, reject) => {
+        db.get('SELECT * FROM bookings WHERE id = ?', [id], (err, row) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(row);
+            }
+        });
+    });
+}
+
+function updateBooking(id, updateData) {
+    return new Promise((resolve, reject) => {
+        const fields = [];
+        const values = [];
+
+        if (updateData.name !== undefined) {
+            fields.push('name = ?');
+            values.push(updateData.name);
+        }
+        if (updateData.email !== undefined) {
+            fields.push('email = ?');
+            values.push(updateData.email);
+        }
+        if (updateData.phone !== undefined) {
+            fields.push('phone = ?');
+            values.push(updateData.phone);
+        }
+        if (updateData.checkIn !== undefined) {
+            fields.push('checkIn = ?');
+            values.push(updateData.checkIn);
+        }
+        if (updateData.checkOut !== undefined) {
+            fields.push('checkOut = ?');
+            values.push(updateData.checkOut);
+        }
+        if (updateData.guests !== undefined) {
+            fields.push('guests = ?');
+            values.push(updateData.guests);
+        }
+        if (updateData.message !== undefined) {
+            fields.push('message = ?');
+            values.push(updateData.message);
+        }
+        if (updateData.confirmed !== undefined) {
+            fields.push('confirmed = ?');
+            values.push(updateData.confirmed ? 1 : 0);
+        }
+
+        fields.push('updatedAt = CURRENT_TIMESTAMP');
+        values.push(id);
+
+        if (fields.length === 1) {
+            reject(new Error('No fields to update'));
+            return;
+        }
+
+        const query = `UPDATE bookings SET ${fields.join(', ')} WHERE id = ?`;
+
+        db.run(query, values, function(err) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({ id, changes: this.changes });
+            }
+        });
+    });
+}
+
+function deleteBooking(id) {
+    return new Promise((resolve, reject) => {
+        db.run('DELETE FROM bookings WHERE id = ?', [id], function(err) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({ id, deleted: this.changes > 0 });
+            }
+        });
     });
 }
 
@@ -101,5 +194,8 @@ module.exports = {
     db,
     addBooking,
     getBookedDates,
-    getAllBookedDates
+    getAllBookings,
+    getBookingById,
+    updateBooking,
+    deleteBooking
 };
