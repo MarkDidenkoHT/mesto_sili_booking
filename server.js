@@ -18,8 +18,7 @@ app.use(helmet({
                 "https://cdnjs.cloudflare.com", 
                 "https://telegram.org", 
                 "https://esm.sh",
-                "https://cdn.weglot.com",
-                "https://api.weglot.com"
+                "https://cdn.weglot.com"
             ],
             styleSrc: [
                 "'self'", 
@@ -38,7 +37,6 @@ app.use(helmet({
                 "'self'", 
                 "https:", 
                 "wss:", 
-                "wss://lzdlfcapkfcobutadffa.supabase.co",
                 "https://api.weglot.com"
             ],
         },
@@ -51,12 +49,18 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/api/config', (req, res) => {
+    res.json({
+        weglotApiKey: process.env.WEGLOT_API_KEY
+    });
+});
+
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'assets', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'assets', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(PORT, () => {

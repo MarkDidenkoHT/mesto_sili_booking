@@ -171,3 +171,14 @@ sections.forEach(section => {
     section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
     sectionObserver.observe(section);
 });
+
+fetch('/api/config')
+    .then(response => response.json())
+    .then(config => {
+        if (config.weglotApiKey && window.Weglot) {
+            Weglot.initialize({
+                api_key: config.weglotApiKey
+            });
+        }
+    })
+    .catch(error => console.error('Config loading error:', error));
