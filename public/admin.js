@@ -145,14 +145,12 @@ function renderBookings(bookings) {
         const row = document.createElement('tr');
         const statusClass = booking.confirmed ? 'status-confirmed' : 'status-pending';
         const statusText = booking.confirmed ? 'Подтверждено' : 'Ожидает';
-        
         row.innerHTML = `
             <td>${booking.id}</td>
             <td>${booking.name}</td>
             <td>${booking.email}</td>
             <td>${booking.phone}</td>
-            <td>${booking.checkIn}</td>
-            <td>${booking.checkOut}</td>
+            <td>${booking.bookingDate}</td>
             <td>${booking.guests}</td>
             <td><span class="status-badge ${statusClass}">${statusText}</span></td>
             <td>
