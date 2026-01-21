@@ -85,8 +85,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-const checkInInput = document.getElementById('checkIn');
-const checkOutInput = document.getElementById('checkOut');
+const checkInInput = document.getElementById('bookingDate');
 const todayDate = new Date().toISOString().split('T')[0];
 checkInInput.setAttribute('min', todayDate);
 
@@ -106,12 +105,7 @@ async function loadBookedDates() {
 }
 
 function isDateBooked(dateStr) {
-    const checkDate = new Date(dateStr);
-    return bookedDates.some(booking => {
-        const bookCheckIn = new Date(booking.checkIn);
-        const bookCheckOut = new Date(booking.checkOut);
-        return checkDate >= bookCheckIn && checkDate < bookCheckOut;
-    });
+    return bookedDates.some(booking => booking.bookingDate === dateStr);
 }
 
 function updateDisabledDates() {
@@ -119,28 +113,7 @@ function updateDisabledDates() {
     const maxDate = new Date();
     maxDate.setFullYear(maxDate.getFullYear() + 1);
     
-    let currentDate = new Date(today);
-    const disabledDates = [];
-    
-    while (currentDate <= maxDate) {
-        if (isDateBooked(currentDate.toISOString().split('T')[0])) {
-            disabledDates.push(currentDate.toISOString().split('T')[0]);
-        }
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    // Apply disabled dates to inputs
     checkInInput.addEventListener('input', function() {
-        if (isDateBooked(this.value)) {
-            this.classList.add('booked');
-            this.title = 'This date is already booked';
-        } else {
-            this.classList.remove('booked');
-            this.title = '';
-        }
-    });
-    
-    checkOutInput.addEventListener('input', function() {
         if (isDateBooked(this.value)) {
             this.classList.add('booked');
             this.title = 'This date is already booked';
@@ -169,31 +142,21 @@ bookingForm.addEventListener('submit', async (e) => {
     
     const formData = new FormData(bookingForm);
     const data = Object.fromEntries(formData);
-    const checkIn = new Date(data.checkIn);
-    const checkOut = new Date(data.checkOut);
+    const bookingDate = new Date(data.bookingDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    if (checkIn < today) {
-        alert('Дата заезда не может быть в прошлом');
-        return;
-    }
-    
-    if (checkOut <= checkIn) {
-        alert('Дата выезда должна быть позже даты заезда');
+    if (bookingDate < today) {
+        alert('Дата посещения не может быть в прошлом');
         return;
     }
 
-    // Check if any date in range is booked
-    for (let d = new Date(checkIn); d < checkOut; d.setDate(d.getDate() + 1)) {
-        if (isDateBooked(d.toISOString().split('T')[0])) {
-            alert('Одна или несколько выбранных дат уже забронированы. Пожалуйста, выберите другие даты.');
-            return;
-        }
+    // Check if date is booked
+    if (isDateBooked(data.bookingDate)) {
+        alert('К сожалению, выбранная дата уже забронирована. Пожалуйста, выберите другую дату.');
+        return;
     }
     
-    const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-
     try {
         const response = await fetch('/api/bookings', {
             method: 'POST',
@@ -209,7 +172,7 @@ bookingForm.addEventListener('submit', async (e) => {
             return;
         }
 
-        alert(`Спасибо за вашу заявку на бронирование!\n\nДетали:\nЗаезд: ${data.checkIn}\nВыезд: ${data.checkOut}\nНочей: ${nights}\nГостей: ${data.guests}\n\nМы свяжемся с вами по номеру ${data.phone} в течение 24 часов для подтверждения бронирования.`);
+        alert(`Спасибо за вашу заявку на бронирование!\n\nДетали:\nДата посещения: ${data.bookingDate}\nГостей: ${data.guests}\n\nМы свяжемся с вами по номеру ${data.phone} в течение 24 часов для подтверждения бронирования.`);
 
         bookingForm.reset();
         closeBookingModal();

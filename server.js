@@ -104,9 +104,9 @@ app.get('/api/booked-dates', async (req, res) => {
 app.post('/api/bookings', bookingLimiter, async (req, res) => {
     try {
         console.log('[API] New booking submission:', { name: req.body.name, email: req.body.email });
-        const { name, email, phone, checkIn, checkOut, guests, message } = req.body;
+        const { name, email, phone, bookingDate, guests, message } = req.body;
 
-        if (!name || !email || !phone || !checkIn || !checkOut || !guests) {
+        if (!name || !email || !phone || !bookingDate || !guests) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
@@ -119,25 +119,19 @@ app.post('/api/bookings', bookingLimiter, async (req, res) => {
             return res.status(400).json({ error: 'Invalid phone number' });
         }
 
-        const checkInDate = new Date(checkIn);
-        const checkOutDate = new Date(checkOut);
+        const bookingDateObj = new Date(bookingDate);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        if (checkInDate < today) {
-            return res.status(400).json({ error: 'Check-in date cannot be in the past' });
-        }
-
-        if (checkOutDate <= checkInDate) {
-            return res.status(400).json({ error: 'Check-out date must be after check-in date' });
+        if (bookingDateObj < today) {
+            return res.status(400).json({ error: 'Booking date cannot be in the past' });
         }
 
         const result = await addBooking({
             name: name.substring(0, 100),
             email: email.substring(0, 100),
             phone: phone.substring(0, 20),
-            checkIn,
-            checkOut,
+            bookingDate,
             guests: parseInt(guests),
             message: message ? message.substring(0, 500) : null
         });
@@ -207,7 +201,7 @@ app.get('/api/admin/bookings/:id', authMiddleware, async (req, res) => {
 app.put('/api/admin/bookings/:id', authMiddleware, async (req, res) => {
     try {
         console.log('[ADMIN] Booking update requested:', req.params.id);
-        const { name, email, phone, checkIn, checkOut, guests, message, confirmed } = req.body;
+        const { name, email, phone, bookingDate, guests, message, confirmed } = req.body;
         const booking = await getBookingById(req.params.id);
 
         if (!booking) {
@@ -219,8 +213,7 @@ app.put('/api/admin/bookings/:id', authMiddleware, async (req, res) => {
         if (name !== undefined) updateData.name = name.substring(0, 100);
         if (email !== undefined) updateData.email = email.substring(0, 100);
         if (phone !== undefined) updateData.phone = phone.substring(0, 20);
-        if (checkIn !== undefined) updateData.checkIn = checkIn;
-        if (checkOut !== undefined) updateData.checkOut = checkOut;
+        if (bookingDate !== undefined) updateData.bookingDate = bookingDate;
         if (guests !== undefined) updateData.guests = parseInt(guests);
         if (message !== undefined) updateData.message = message ? message.substring(0, 500) : null;
         if (confirmed !== undefined) updateData.confirmed = confirmed;

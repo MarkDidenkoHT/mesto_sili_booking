@@ -211,8 +211,7 @@ async function editBooking(id) {
         document.getElementById('bEmail').value = booking.email;
         document.getElementById('bPhone').value = booking.phone;
         document.getElementById('bGuests').value = booking.guests;
-        document.getElementById('bCheckIn').value = booking.checkIn;
-        document.getElementById('bCheckOut').value = booking.checkOut;
+        document.getElementById('bBookingDate').value = booking.bookingDate;
         document.getElementById('bMessage').value = booking.message || '';
         document.getElementById('bConfirmed').checked = booking.confirmed === 1;
         
@@ -257,8 +256,7 @@ bookingForm.addEventListener('submit', async (e) => {
         email: formData.get('email'),
         phone: formData.get('phone'),
         guests: formData.get('guests'),
-        checkIn: formData.get('checkIn'),
-        checkOut: formData.get('checkOut'),
+        bookingDate: formData.get('bookingDate'),
         message: formData.get('message'),
         confirmed: formData.get('confirmed') === 'on'
     };

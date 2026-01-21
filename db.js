@@ -18,8 +18,7 @@ function initializeDatabase() {
             name TEXT NOT NULL,
             email TEXT NOT NULL,
             phone TEXT NOT NULL,
-            checkIn TEXT NOT NULL,
-            checkOut TEXT NOT NULL,
+            bookingDate TEXT NOT NULL,
             guests INTEGER NOT NULL,
             message TEXT,
             confirmed INTEGER DEFAULT 0,
@@ -38,14 +37,13 @@ function initializeDatabase() {
 function addBooking(bookingData) {
     return new Promise((resolve, reject) => {
         db.run(
-            `INSERT INTO bookings (name, email, phone, checkIn, checkOut, guests, message, confirmed) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
+            `INSERT INTO bookings (name, email, phone, bookingDate, guests, message, confirmed) 
+             VALUES (?, ?, ?, ?, ?, ?, 0)`,
             [
                 bookingData.name,
                 bookingData.email,
                 bookingData.phone,
-                bookingData.checkIn,
-                bookingData.checkOut,
+                bookingData.bookingDate,
                 bookingData.guests,
                 bookingData.message || null
             ],
@@ -63,7 +61,7 @@ function addBooking(bookingData) {
 function getBookedDates() {
     return new Promise((resolve, reject) => {
         db.all(
-            `SELECT checkIn, checkOut FROM bookings 
+            `SELECT bookingDate FROM bookings 
              WHERE confirmed = 1`,
             (err, rows) => {
                 if (err) {
@@ -82,12 +80,12 @@ function getAllBookings(filters = {}) {
         const params = [];
 
         if (filters.year) {
-            query += ' AND strftime("%Y", checkIn) = ?';
+            query += ' AND strftime("%Y", bookingDate) = ?';
             params.push(filters.year.toString());
         }
 
         if (filters.month) {
-            query += ' AND strftime("%m", checkIn) = ?';
+            query += ' AND strftime("%m", bookingDate) = ?';
             params.push(String(filters.month).padStart(2, '0'));
         }
 
@@ -96,7 +94,7 @@ function getAllBookings(filters = {}) {
             params.push(filters.confirmed ? 1 : 0);
         }
 
-        query += ' ORDER BY checkIn DESC';
+        query += ' ORDER BY bookingDate DESC';
 
         db.all(query, params, (err, rows) => {
             if (err) {
@@ -137,13 +135,9 @@ function updateBooking(id, updateData) {
             fields.push('phone = ?');
             values.push(updateData.phone);
         }
-        if (updateData.checkIn !== undefined) {
-            fields.push('checkIn = ?');
-            values.push(updateData.checkIn);
-        }
-        if (updateData.checkOut !== undefined) {
-            fields.push('checkOut = ?');
-            values.push(updateData.checkOut);
+        if (updateData.bookingDate !== undefined) {
+            fields.push('bookingDate = ?');
+            values.push(updateData.bookingDate);
         }
         if (updateData.guests !== undefined) {
             fields.push('guests = ?');
