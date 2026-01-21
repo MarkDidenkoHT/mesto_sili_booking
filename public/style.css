@@ -548,6 +548,26 @@ body {
     border-color: var(--primary);
 }
 
+.form-group input.booked {
+    background: #f5f5f5;
+    color: #999;
+    border-color: #ddd;
+    cursor: not-allowed;
+}
+
+.flatpickr-day.disabled {
+    color: #999;
+    background: #f5f5f5;
+    text-decoration: line-through;
+    cursor: not-allowed;
+}
+
+.flatpickr-day.disabled:hover {
+    background: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
 .submit-button {
     background: var(--secondary);
     color: var(--white);
@@ -639,21 +659,6 @@ body {
     cursor: pointer;
     border-radius: 4px;
     overflow: hidden;
-}
-
-input[type="date"].booked {
-    background-color: #ffe6e6;
-    color: #999;
-}
-
-input[type="date"].booked::-webkit-calendar-picker-indicator {
-    opacity: 0.5;
-}
-
-input.booked {
-    background: #eee !important;
-    color: #aaa !important;
-    border-color: #ccc !important;
 }
 
 @media (max-width: 1024px) {

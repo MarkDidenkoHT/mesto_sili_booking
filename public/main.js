@@ -86,27 +86,9 @@ document.addEventListener('keydown', (e) => {
 });
 
 const checkInInput = document.getElementById('bookingDate');
-const todayDate = new Date().toISOString().split('T')[0];
-checkInInput.setAttribute('min', todayDate);
-
 let bookedDates = [];
 let bookedDatesSet = new Set();
-
-function renderBookedDatesDatalist() {
-    let datalist = document.getElementById('bookedDatesList');
-    if (!datalist) {
-        datalist = document.createElement('datalist');
-        datalist.id = 'bookedDatesList';
-        document.body.appendChild(datalist);
-    }
-    datalist.innerHTML = '';
-    bookedDates.forEach(b => {
-        const option = document.createElement('option');
-        option.value = b.bookingDate;
-        datalist.appendChild(option);
-    });
-    checkInInput.setAttribute('list', 'bookedDatesList');
-}
+let flatpickrInstance = null;
 
 async function loadBookedDates() {
     try {
@@ -115,46 +97,43 @@ async function loadBookedDates() {
         const data = await response.json();
         bookedDates = data.bookedDates;
         bookedDatesSet = new Set(bookedDates.map(b => b.bookingDate));
-        renderBookedDatesDatalist();
-        updateDisabledDates();
+        initializeDatePicker();
     } catch (error) {
         console.error('Error loading booked dates:', error);
     }
 }
 
-function isDateBooked(dateStr) {
-    return bookedDatesSet.has(dateStr);
-}
+function initializeDatePicker() {
+    if (flatpickrInstance) {
+        flatpickrInstance.destroy();
+    }
 
-function updateDisabledDates() {
-    checkInInput.addEventListener('input', function() {
-        if (isDateBooked(this.value)) {
-            this.classList.add('booked');
-            this.value = '';
-            this.setCustomValidity('Эта дата уже забронирована');
-            this.reportValidity();
-        } else {
-            this.classList.remove('booked');
-            this.setCustomValidity('');
+    const todayDate = new Date();
+    const tomorrow = new Date(todayDate);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const disabledDates = Array.from(bookedDatesSet).map(date => new Date(date));
+
+    flatpickrInstance = flatpickr(checkInInput, {
+        locale: 'ru',
+        minDate: todayDate,
+        dateFormat: 'Y-m-d',
+        disable: disabledDates,
+        onChange: function(selectedDates, dateStr, instance) {
+            checkInInput.classList.remove('booked');
+            if (bookedDatesSet.has(dateStr)) {
+                checkInInput.classList.add('booked');
+                instance.clear();
+                setTimeout(() => {
+                    alert('Выбранная дата уже забронирована. Пожалуйста, выберите другую дату.');
+                }, 10);
+            }
+        },
+        onReady: function(selectedDates, dateStr, instance) {
+            instance.element.classList.add('flatpickr-input');
         }
     });
-
-    checkInInput.addEventListener('focus', function() {
-        this.blur();
-        setTimeout(() => this.focus(), 10);
-    });
 }
-
-checkInInput.addEventListener('change', () => {
-    const checkInDate = new Date(checkInInput.value);
-    checkInDate.setDate(checkInDate.getDate() + 1);
-    const minCheckOut = checkInDate.toISOString().split('T')[0];
-    // checkOutInput.setAttribute('min', minCheckOut);
-    
-    // if (checkOutInput.value && new Date(checkOutInput.value) <= new Date(checkInInput.value)) {
-    //     checkOutInput.value = '';
-    // }
-});
 
 const bookingForm = document.getElementById('bookingForm');
 
@@ -172,8 +151,7 @@ bookingForm.addEventListener('submit', async (e) => {
         return;
     }
 
-    // Check if date is booked
-    if (isDateBooked(data.bookingDate)) {
+    if (bookedDatesSet.has(data.bookingDate)) {
         alert('К сожалению, выбранная дата уже забронирована. Пожалуйста, выберите другую дату.');
         return;
     }
@@ -204,7 +182,6 @@ bookingForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Load booked dates on page load
 window.addEventListener('load', () => {
     loadBookedDates();
     initSwiper();
