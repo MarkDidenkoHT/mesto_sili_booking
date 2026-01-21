@@ -1,21 +1,10 @@
-console.log('[ADMIN-JS] Script loaded');
-
 let token = localStorage.getItem('adminToken');
-console.log('[ADMIN-JS] Token from localStorage:', token ? 'exists' : 'not found');
 
 const loginPage = document.getElementById('loginPage');
 const dashboardPage = document.getElementById('dashboardPage');
 const loginForm = document.getElementById('loginForm');
 const logoutBtn = document.getElementById('logoutBtn');
 const loginError = document.getElementById('loginError');
-
-console.log('[ADMIN-JS] DOM elements check:', {
-    loginPage: !!loginPage,
-    dashboardPage: !!dashboardPage,
-    loginForm: !!loginForm,
-    logoutBtn: !!logoutBtn,
-    loginError: !!loginError
-});
 
 const yearFilter = document.getElementById('yearFilter');
 const monthFilter = document.getElementById('monthFilter');
@@ -41,12 +30,9 @@ console.log('[ADMIN-JS] Filter elements check:', {
 
 let currentBookingId = null;
 
-// Check if already logged in
 if (token) {
-    console.log('[ADMIN-JS] User already logged in, showing dashboard');
     showDashboard();
 } else {
-    console.log('[ADMIN-JS] User not logged in, showing login form');
     showLogin();
 }
 
@@ -65,7 +51,6 @@ function showDashboard() {
     loadBookings();
 }
 
-// Login
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -102,14 +87,12 @@ loginForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Logout
 logoutBtn.addEventListener('click', () => {
     console.log('[ADMIN-JS] Logout clicked');
     localStorage.removeItem('adminToken');
     showLogin();
 });
 
-// Populate year filter
 function populateYearFilter() {
     console.log('[ADMIN-JS] Populating year filter');
     const currentYear = new Date().getFullYear();
@@ -121,7 +104,6 @@ function populateYearFilter() {
     }
 }
 
-// Load bookings
 async function loadBookings() {
     try {
         console.log('[ADMIN-JS] Loading bookings...');
@@ -150,7 +132,6 @@ async function loadBookings() {
     }
 }
 
-// Render bookings
 function renderBookings(bookings) {
     console.log('[ADMIN-JS] Rendering', bookings.length, 'bookings');
     bookingsBody.innerHTML = '';
@@ -176,8 +157,8 @@ function renderBookings(bookings) {
             <td><span class="status-badge ${statusClass}">${statusText}</span></td>
             <td>
                 <div class="actions-cell">
-                    <button class="btn btn-edit" onclick="editBooking(${booking.id})">Редактировать</button>
-                    <button class="btn btn-delete" onclick="deleteBooking(${booking.id})">Удалить</button>
+                    <button class="btn btn-edit" data-action="edit" data-id="${booking.id}">Редактировать</button>
+                    <button class="btn btn-delete" data-action="delete" data-id="${booking.id}">Удалить</button>
                 </div>
             </td>
         `;
@@ -185,10 +166,22 @@ function renderBookings(bookings) {
     });
 }
 
-// Apply filters
+bookingsBody.addEventListener('click', async (e) => {
+    const button = e.target.closest('button[data-action]');
+    if (!button) return;
+    
+    const action = button.dataset.action;
+    const id = parseInt(button.dataset.id);
+    
+    if (action === 'edit') {
+        editBooking(id);
+    } else if (action === 'delete') {
+        deleteBooking(id);
+    }
+});
+
 applyFiltersBtn.addEventListener('click', loadBookings);
 
-// Add booking
 addBookingBtn.addEventListener('click', () => {
     console.log('[ADMIN-JS] Add booking clicked');
     currentBookingId = null;
@@ -197,7 +190,6 @@ addBookingBtn.addEventListener('click', () => {
     bookingModal.classList.add('active');
 });
 
-// Edit booking
 async function editBooking(id) {
     try {
         console.log('[ADMIN-JS] Edit booking:', id);
@@ -231,7 +223,6 @@ async function editBooking(id) {
     }
 }
 
-// Delete booking
 async function deleteBooking(id) {
     console.log('[ADMIN-JS] Delete booking:', id);
     if (!confirm('Вы уверены, что хотите удалить это бронирование?')) {
@@ -255,7 +246,6 @@ async function deleteBooking(id) {
     }
 }
 
-// Save booking
 bookingForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -303,7 +293,6 @@ bookingForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Modal controls
 modalClose.addEventListener('click', () => {
     console.log('[ADMIN-JS] Modal close clicked');
     bookingModal.classList.remove('active');
