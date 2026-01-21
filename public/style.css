@@ -650,6 +650,12 @@ input[type="date"].booked::-webkit-calendar-picker-indicator {
     opacity: 0.5;
 }
 
+input.booked {
+    background: #eee !important;
+    color: #aaa !important;
+    border-color: #ccc !important;
+}
+
 @media (max-width: 1024px) {
     .about-grid {
         gap: 30px;

@@ -90,14 +90,32 @@ const todayDate = new Date().toISOString().split('T')[0];
 checkInInput.setAttribute('min', todayDate);
 
 let bookedDates = [];
+let bookedDatesSet = new Set();
 
-// Fetch booked dates on page load
+function renderBookedDatesDatalist() {
+    let datalist = document.getElementById('bookedDatesList');
+    if (!datalist) {
+        datalist = document.createElement('datalist');
+        datalist.id = 'bookedDatesList';
+        document.body.appendChild(datalist);
+    }
+    datalist.innerHTML = '';
+    bookedDates.forEach(b => {
+        const option = document.createElement('option');
+        option.value = b.bookingDate;
+        datalist.appendChild(option);
+    });
+    checkInInput.setAttribute('list', 'bookedDatesList');
+}
+
 async function loadBookedDates() {
     try {
         const response = await fetch('/api/booked-dates');
         if (!response.ok) throw new Error('Failed to fetch booked dates');
         const data = await response.json();
         bookedDates = data.bookedDates;
+        bookedDatesSet = new Set(bookedDates.map(b => b.bookingDate));
+        renderBookedDatesDatalist();
         updateDisabledDates();
     } catch (error) {
         console.error('Error loading booked dates:', error);
@@ -105,22 +123,25 @@ async function loadBookedDates() {
 }
 
 function isDateBooked(dateStr) {
-    return bookedDates.some(booking => booking.bookingDate === dateStr);
+    return bookedDatesSet.has(dateStr);
 }
 
 function updateDisabledDates() {
-    const today = new Date();
-    const maxDate = new Date();
-    maxDate.setFullYear(maxDate.getFullYear() + 1);
-    
     checkInInput.addEventListener('input', function() {
         if (isDateBooked(this.value)) {
             this.classList.add('booked');
-            this.title = 'This date is already booked';
+            this.value = '';
+            this.setCustomValidity('Эта дата уже забронирована');
+            this.reportValidity();
         } else {
             this.classList.remove('booked');
-            this.title = '';
+            this.setCustomValidity('');
         }
+    });
+
+    checkInInput.addEventListener('focus', function() {
+        this.blur();
+        setTimeout(() => this.focus(), 10);
     });
 }
 
@@ -128,11 +149,11 @@ checkInInput.addEventListener('change', () => {
     const checkInDate = new Date(checkInInput.value);
     checkInDate.setDate(checkInDate.getDate() + 1);
     const minCheckOut = checkInDate.toISOString().split('T')[0];
-    checkOutInput.setAttribute('min', minCheckOut);
+    // checkOutInput.setAttribute('min', minCheckOut);
     
-    if (checkOutInput.value && new Date(checkOutInput.value) <= new Date(checkInInput.value)) {
-        checkOutInput.value = '';
-    }
+    // if (checkOutInput.value && new Date(checkOutInput.value) <= new Date(checkInInput.value)) {
+    //     checkOutInput.value = '';
+    // }
 });
 
 const bookingForm = document.getElementById('bookingForm');
