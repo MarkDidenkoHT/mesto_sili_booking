@@ -46,17 +46,18 @@ function updatePageText() {
     });
 }
 
-function initializeLanguageSwitcher() {
-    const langButtons = document.querySelectorAll('.lang-btn');
-    
-    updateFlagButtons();
+const languageSwitcher = document.getElementById('languageSwitcher');
+const langOptions = ['ru', 'en', 'fr'];
 
-    langButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const lang = btn.getAttribute('data-lang');
-            setLanguage(lang);
-        });
+function initializeLanguageSwitcher() {
+    langOptions.forEach(lang => {
+        const option = document.createElement('option');
+        option.value = lang;
+        option.textContent = lang.toUpperCase();
+        languageSwitcher.appendChild(option);
+    });
+    languageSwitcher.addEventListener('change', (e) => {
+        setLanguage(e.target.value);
     });
 }
 
