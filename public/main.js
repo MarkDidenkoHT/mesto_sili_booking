@@ -363,36 +363,3 @@ function initSwiper() {
 
 window.addEventListener('load', initSwiper);
 window.addEventListener('resize', initSwiper);
-
-fetch('/api/config')
-    .then(response => {
-        if (!response.ok) throw new Error('Config fetch failed');
-        return response.json();
-    })
-    .then(config => {
-        if (config.weglotApiKey) {
-            if (typeof window.Weglot !== 'undefined') {
-                Weglot.initialize({
-                    api_key: config.weglotApiKey
-                });
-                
-                setTimeout(() => {
-                    const weglotUI = document.querySelector('.wg-drop');
-                    
-                    if (weglotUI) {
-                        const container = document.querySelector('.weglot-container');
-                        if (container) {
-                            container.appendChild(weglotUI);
-                        }
-                    }
-                }, 1000);
-            } else {
-                console.error('Weglot library not loaded');
-            }
-        } else {
-            console.warn('No API Key provided');
-        }
-    })
-    .catch(error => {
-        console.error('Config loading error:', error);
-    });

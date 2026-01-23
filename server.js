@@ -36,31 +36,24 @@ app.use(helmet({
                 "'self'", 
                 "'unsafe-inline'", 
                 "https://cdn.jsdelivr.net", 
-                "https://cdnjs.cloudflare.com", 
-                "https://telegram.org", 
-                "https://esm.sh",
-                "https://cdn.weglot.com",
-                "https://api.weglot.com" 
+                "https://cdnjs.cloudflare.com"
             ],
             styleSrc: [
                 "'self'", 
                 "'unsafe-inline'", 
                 "https://fonts.googleapis.com", 
-                "https://cdn.jsdelivr.net",
-                "https://cdn.weglot.com"
+                "https://cdn.jsdelivr.net"
             ],
             fontSrc: [
                 "'self'", 
                 "data:",
-                "https://fonts.gstatic.com",
-                "https://cdn.weglot.com"
+                "https://fonts.gstatic.com"
             ],
             imgSrc: ["'self'", "data:", "https:"],
             connectSrc: [
                 "'self'", 
                 "https:", 
-                "wss:", 
-                "https://api.weglot.com"
+                "wss:"
             ],
         },
     },
