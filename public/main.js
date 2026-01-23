@@ -2,12 +2,17 @@ let currentLanguage = localStorage.getItem('language') || 'ru';
 let translations = null;
 
 function loadTranslations() {
+    console.log('loadTranslations called');
+    console.log('window.translations:', window.translations);
+    
     if (!window.translations) {
+        console.log('translations not loaded yet, retrying...');
         setTimeout(loadTranslations, 50);
         return;
     }
     
     translations = window.translations;
+    console.log('translations loaded:', translations);
     updatePageText();
     initializeLanguageSwitcher();
 }

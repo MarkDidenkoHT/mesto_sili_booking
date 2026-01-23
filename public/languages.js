@@ -1,3 +1,5 @@
+console.log('languages.js loading...');
+
 window.translations = {
   "ru": {
     "nav.home": "Главная",
@@ -180,3 +182,5 @@ window.translations = {
     "footer.copyright": "&copy; 2026 Place of Power. All rights reserved."
   }
 };
+
+console.log('window.translations set:', window.translations);
