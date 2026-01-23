@@ -18,6 +18,7 @@ function loadTranslations() {
 }
 
 function t(key) {
+    console.log('Translating key:', key, 'for language:', currentLanguage);
     const keys = key.split('.');
     let value = translations[currentLanguage];
     
@@ -25,10 +26,12 @@ function t(key) {
         if (value && typeof value === 'object') {
             value = value[k];
         } else {
+            console.log('Translation not found for:', key);
             return key;
         }
     }
     
+    console.log('Translation result:', value);
     return value || key;
 }
 
