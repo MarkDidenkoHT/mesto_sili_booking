@@ -92,7 +92,6 @@ app.get('/api/booked-dates', async (req, res) => {
     }
 });
 
-
 const TELEGRAM_BOT_TOKEN = '7000627860:AAGsYahsW5lVrMyhyy-cGst2fMTx962ktOg';
 const TELEGRAM_CHAT_ID = '-1003498233200';
 
@@ -122,21 +121,16 @@ ID бронирования: #${booking.id}
             })
         });
 
-        const result = await response.json();
+        const responseText = await response.text();
         
         if (!response.ok) {
-            console.error('[TELEGRAM] Error details:', {
-                status: response.status,
-                statusText: response.statusText,
-                errorCode: result.error_code,
-                description: result.description,
-                chatId: TELEGRAM_CHAT_ID
-            });
+            console.error('[TELEGRAM] Error sending notification. Status:', response.status);
+            console.error('[TELEGRAM] Telegram API response:', responseText);
         } else {
             console.log('[TELEGRAM] Notification sent for booking #' + booking.id);
         }
     } catch (error) {
-        console.error('[TELEGRAM] Error:', error);
+        console.error('[TELEGRAM] Fetch error:', error);
     }
 }
 
