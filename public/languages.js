@@ -1,4 +1,4 @@
-const translations = {
+window.translations = {
   "ru": {
     "nav.home": "Главная",
     "nav.about": "О нас",

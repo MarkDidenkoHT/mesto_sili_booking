@@ -1,19 +1,17 @@
 let currentLanguage = localStorage.getItem('language') || 'ru';
-let translations = {};
 
 function loadTranslations() {
-    translations = window.translations || {};
+    const translations = window.translations;
     
-    if (Object.keys(translations).length === 0) {
-        console.error('Translations not loaded from languages.js');
+    if (!translations || Object.keys(translations).length === 0) {
         return;
     }
     
-    updatePageText();
-    initializeLanguageSwitcher();
+    updatePageText(translations);
+    initializeLanguageSwitcher(translations);
 }
 
-function t(key) {
+function t(key, translations) {
     const keys = key.split('.');
     let value = translations[currentLanguage];
     
@@ -21,7 +19,6 @@ function t(key) {
         if (value && typeof value === 'object') {
             value = value[k];
         } else {
-            console.warn(`Missing translation key: ${key}`);
             return key;
         }
     }
@@ -29,14 +26,13 @@ function t(key) {
     return value || key;
 }
 
-function updatePageText() {
+function updatePageText(translations) {
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
-        const translatedText = t(key);
+        const translatedText = t(key, translations);
         
         if (element.tagName === 'OPTION') {
             element.textContent = translatedText;
-        } else if (element.tagName === 'INPUT' && element.type === 'checkbox') {
         } else {
             element.textContent = translatedText;
         }
@@ -44,43 +40,31 @@ function updatePageText() {
 
     document.querySelectorAll('[data-i18n-html]').forEach(element => {
         const key = element.getAttribute('data-i18n-html');
-        element.innerHTML = t(key);
+        element.innerHTML = t(key, translations);
     });
 }
 
-function initializeLanguageSwitcher() {
+function initializeLanguageSwitcher(translations) {
     const langButtons = document.querySelectorAll('.lang-btn');
     
-    if (langButtons.length === 0) {
-        console.warn('Language switcher buttons not found');
-        return;
-    }
-
     updateFlagButtons();
 
     langButtons.forEach(btn => {
-        btn.addEventListener('click', handleLanguageChange);
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const lang = btn.getAttribute('data-lang');
+            setLanguage(lang, translations);
+        });
     });
 }
 
-function handleLanguageChange(e) {
-    e.preventDefault();
-    const lang = this.getAttribute('data-lang');
-    setLanguage(lang);
-}
-
-function setLanguage(lang) {
-    if (!translations[lang]) {
-        console.warn(`Language not available: ${lang}`);
-        return;
-    }
-
+function setLanguage(lang, translations) {
+    if (!translations[lang]) return;
+    
     currentLanguage = lang;
     localStorage.setItem('language', lang);
-    
-    updatePageText();
+    updatePageText(translations);
     updateFlagButtons();
-    
     document.documentElement.lang = lang;
 }
 
@@ -90,9 +74,7 @@ function updateFlagButtons() {
     });
     
     const activeBtn = document.querySelector(`[data-lang="${currentLanguage}"]`);
-    if (activeBtn) {
-        activeBtn.classList.add('active');
-    }
+    if (activeBtn) activeBtn.classList.add('active');
 }
 
 document.addEventListener('DOMContentLoaded', function() {
