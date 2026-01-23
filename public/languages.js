@@ -1,117 +1,182 @@
-let currentLanguage = localStorage.getItem('language') || 'ru';
-let translations = {};
-
-async function loadTranslations() {
-    try {
-        const response = await fetch('/translations.json');
-        if (!response.ok) {
-            throw new Error(`Failed to load translations: ${response.status}`);
-        }
-        translations = await response.json();
-        console.log('[i18n] Translations loaded successfully');
-        updatePageText();
-        initializeLanguageSwitcher();
-    } catch (error) {
-        console.error('[i18n] Error loading translations:', error);
-    }
-}
-
-function t(key) {
-    const keys = key.split('.');
-    let value = translations[currentLanguage];
-    
-    for (const k of keys) {
-        if (value && typeof value === 'object') {
-            value = value[k];
-        } else {
-            console.warn(`[i18n] Missing translation key: ${key}`);
-            return key;
-        }
-    }
-    
-    return value || key;
-}
-
-function updatePageText() {
-    // Update text content
-    document.querySelectorAll('[data-i18n]').forEach(element => {
-        const key = element.getAttribute('data-i18n');
-        const translatedText = t(key);
-        
-        if (element.tagName === 'OPTION') {
-            element.textContent = translatedText;
-        } else if (element.tagName === 'INPUT' && element.type === 'checkbox') {
-            // Skip checkboxes, they don't have text content
-        } else {
-            element.textContent = translatedText;
-        }
-    });
-
-    // Update placeholders
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
-        const key = element.getAttribute('data-i18n-placeholder');
-        element.placeholder = t(key);
-    });
-
-    // Update HTML content (for footer copyright)
-    document.querySelectorAll('[data-i18n-html]').forEach(element => {
-        const key = element.getAttribute('data-i18n-html');
-        element.innerHTML = t(key);
-    });
-}
-
-function initializeLanguageSwitcher() {
-    const langButtons = document.querySelectorAll('.lang-btn');
-    
-    if (langButtons.length === 0) {
-        console.warn('[i18n] Language switcher buttons not found');
-        return;
-    }
-
-    updateFlagButtons();
-
-    langButtons.forEach(btn => {
-        btn.addEventListener('click', handleLanguageChange);
-    });
-}
-
-function handleLanguageChange(e) {
-    e.preventDefault();
-    const lang = this.getAttribute('data-lang');
-    setLanguage(lang);
-}
-
-function setLanguage(lang) {
-    if (!translations[lang]) {
-        console.warn(`[i18n] Language not available: ${lang}`);
-        return;
-    }
-
-    currentLanguage = lang;
-    localStorage.setItem('language', lang);
-    console.log(`[i18n] Language changed to: ${lang}`);
-    
-    updatePageText();
-    updateFlagButtons();
-    
-    // Update HTML lang attribute
-    document.documentElement.lang = lang;
-}
-
-function updateFlagButtons() {
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    const activeBtn = document.querySelector(`[data-lang="${currentLanguage}"]`);
-    if (activeBtn) {
-        activeBtn.classList.add('active');
-    }
-}
-
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadTranslations);
-} else {
-    loadTranslations();
-}
+const translations = {
+  "ru": {
+    "nav.home": "Главная",
+    "nav.about": "О нас",
+    "nav.amenities": "Условия",
+    "nav.gallery": "Галерея",
+    "nav.contact": "Контакты",
+    "header.book": "Забронировать",
+    "hero.title": "Ваше место для восстановления сил",
+    "hero.subtitle": "Эко-глэмпинг для единения с природой, спокойствия и отдыха",
+    "hero.cta": "Забронировать отдых",
+    "about.title": "Уединение с природой",
+    "about.text1": "Расположенный в живописном месте, наш эко-глэмпинг предлагает уникальный опыт единения с природой. Мы создали пространство, где комфорт сочетается с естественной красотой окружающего мира.",
+    "about.text2": "Просыпайтесь под пение птиц, проводите дни в гармонии с природой, а вечера наслаждайтесь тишиной и звездным небом. Это не просто отдых — это восстановление внутренних сил.",
+    "about.cottages": "Коттеджа",
+    "about.bathrooms": "Банных комнаты",
+    "about.guests": "Гостей максимум",
+    "amenities.title": "Наши условия",
+    "amenities.subtitle": "Все для комфортного единения с природой",
+    "amenities.1": "Зона костра",
+    "amenities.1_desc": "Уютное место для вечерних посиделок у костра под открытым небом",
+    "amenities.2": "Экологичность",
+    "amenities.2_desc": "Бережное отношение к природе и использование экологичных материалов",
+    "amenities.3": "Зона для йоги",
+    "amenities.3_desc": "Специально оборудованное пространство для практик и медитаций",
+    "amenities.4": "Прогулки",
+    "amenities.4_desc": "Живописные маршруты для прогулок по окрестностям",
+    "amenities.5": "Наблюдение за звездами",
+    "amenities.5_desc": "Идеальные условия для наблюдения за ночным небом вдали от городских огней",
+    "amenities.6": "Чайная церемония",
+    "amenities.6_desc": "Возможность участия в традиционных чайных церемониях на природе",
+    "gallery.title": "Наша территория",
+    "gallery.1": "Территория глэмпинга",
+    "gallery.2": "Интерьер глэмпинга",
+    "gallery.3": "Общая зона",
+    "gallery.4": "Природный ландшафт",
+    "gallery.5": "Внутреннее убранство",
+    "gallery.6": "Вечерний вид",
+    "modal.title": "Забронировать отдых",
+    "modal.date": "Дата посещения",
+    "modal.guests": "Количество гостей",
+    "modal.guests_select": "Выберите количество",
+    "modal.guest_1": "1 гость",
+    "modal.guest_2": "2 гостя",
+    "modal.guest_4": "4 гостя",
+    "modal.guest_6": "6 гостей",
+    "modal.guest_8": "8 гостей",
+    "modal.name": "ФИО",
+    "modal.email": "Email",
+    "modal.phone": "Номер телефона",
+    "modal.message": "Особые пожелания (необязательно)",
+    "modal.submit": "Отправить заявку на бронирование",
+    "footer.title": "Место силы",
+    "footer.desc": "Эко-глэмпинг, ориентированный на единение с природой, спокойствие и восстановление сил.",
+    "footer.nav": "Навигация",
+    "footer.contacts": "Контакты",
+    "footer.social": "Социальные сети",
+    "footer.address": "📍 Тирасполь, пер. Горплавни, 2, Tiraspol 3300",
+    "footer.phone": "📞 +373 778 404 81",
+    "footer.copyright": "&copy; 2026 Место силы. Все права защищены."
+  },
+  "md": {
+    "nav.home": "Acasă",
+    "nav.about": "Despre noi",
+    "nav.amenities": "Condiții",
+    "nav.gallery": "Galerie",
+    "nav.contact": "Contacte",
+    "header.book": "Rezervă",
+    "hero.title": "Locul tău pentru restabilirea forțelor",
+    "hero.subtitle": "Eco-glamping pentru unitatea cu natura, liniștea și odihnă",
+    "hero.cta": "Rezervă o vacanță",
+    "about.title": "Retragere în natură",
+    "about.text1": "Situat într-un loc pitoresc, eco-glamping-ul nostru oferă o experiență unică de unitate cu natura. Am creat un spațiu în care confortul se combină cu frumusețea naturală a lumii înconjurătoare.",
+    "about.text2": "Trezi-te la cântul păsărilor, petrece zilele în armonie cu natura, iar serile bucură-te de liniște și cer plin de stele. Nu este pur și simplu o vacanță - este restabilirea forțelor interne.",
+    "about.cottages": "Cabane",
+    "about.bathrooms": "Băi",
+    "about.guests": "Oaspeți maxim",
+    "amenities.title": "Condițiile noastre",
+    "amenities.subtitle": "Tot ceea ce trebuie pentru o unitate confortabilă cu natura",
+    "amenities.1": "Zona focului",
+    "amenities.1_desc": "Un loc acogedor pentru ședințele de seară la foc sub cerul liber",
+    "amenities.2": "Ecologie",
+    "amenities.2_desc": "Atitudine grijulie față de natură și utilizarea materialelor ecologice",
+    "amenities.3": "Zona de yoga",
+    "amenities.3_desc": "Spațiu special echipat pentru practici și meditații",
+    "amenities.4": "Plimbări",
+    "amenities.4_desc": "Rute pitorești pentru plimbări în împrejurimi",
+    "amenities.5": "Observarea stelelor",
+    "amenities.5_desc": "Condiții ideale pentru a observa cerul nocturn departe de luminile orașului",
+    "amenities.6": "Ceremonii de ceai",
+    "amenities.6_desc": "Posibilitatea de a participa la ceremonii tradiționale de ceai în natură",
+    "gallery.title": "Teritoriul nostru",
+    "gallery.1": "Teritoriul glamping-ului",
+    "gallery.2": "Interiorul glamping-ului",
+    "gallery.3": "Zona comună",
+    "gallery.4": "Peisaj natural",
+    "gallery.5": "Decorare interioară",
+    "gallery.6": "Vedere seara",
+    "modal.title": "Rezervă o vacanță",
+    "modal.date": "Data vizitei",
+    "modal.guests": "Numărul de oaspeți",
+    "modal.guests_select": "Alegeți numărul",
+    "modal.guest_1": "1 oaspete",
+    "modal.guest_2": "2 oaspeți",
+    "modal.guest_4": "4 oaspeți",
+    "modal.guest_6": "6 oaspeți",
+    "modal.guest_8": "8 oaspeți",
+    "modal.name": "Nume complet",
+    "modal.email": "Email",
+    "modal.phone": "Numărul de telefon",
+    "modal.message": "Cerințe speciale (opțional)",
+    "modal.submit": "Trimiteți cererea de rezervare",
+    "footer.title": "Loc de putere",
+    "footer.desc": "Eco-glamping orientat pe unitatea cu natura, liniștea și restabilirea forțelor.",
+    "footer.nav": "Navigare",
+    "footer.contacts": "Contacte",
+    "footer.social": "Rețele sociale",
+    "footer.address": "📍 Tiraspol, str. Gorplauni, 2, Tiraspol 3300",
+    "footer.phone": "📞 +373 778 404 81",
+    "footer.copyright": "&copy; 2026 Loc de putere. Toate drepturile sunt rezervate."
+  },
+  "en": {
+    "nav.home": "Home",
+    "nav.about": "About",
+    "nav.amenities": "Amenities",
+    "nav.gallery": "Gallery",
+    "nav.contact": "Contact",
+    "header.book": "Book",
+    "hero.title": "Your Place for Restoring Your Strength",
+    "hero.subtitle": "Eco-glamping for unity with nature, peace and relaxation",
+    "hero.cta": "Book a vacation",
+    "about.title": "Seclusion with Nature",
+    "about.text1": "Located in a scenic place, our eco-glamping offers a unique experience of unity with nature. We have created a space where comfort combines with the natural beauty of the surrounding world.",
+    "about.text2": "Wake up to the sound of birds, spend your days in harmony with nature, and enjoy the silence and starry sky in the evenings. It's not just a vacation - it's a restoration of inner strength.",
+    "about.cottages": "Cottages",
+    "about.bathrooms": "Bath rooms",
+    "about.guests": "Max guests",
+    "amenities.title": "Our Amenities",
+    "amenities.subtitle": "Everything for comfortable unity with nature",
+    "amenities.1": "Bonfire Area",
+    "amenities.1_desc": "A cozy place for evening gatherings by a bonfire under the open sky",
+    "amenities.2": "Ecology",
+    "amenities.2_desc": "Caring attitude towards nature and the use of ecological materials",
+    "amenities.3": "Yoga Zone",
+    "amenities.3_desc": "A specially equipped space for practices and meditations",
+    "amenities.4": "Walks",
+    "amenities.4_desc": "Scenic routes for walks around the area",
+    "amenities.5": "Stargazing",
+    "amenities.5_desc": "Ideal conditions for observing the night sky away from city lights",
+    "amenities.6": "Tea Ceremonies",
+    "amenities.6_desc": "The opportunity to participate in traditional tea ceremonies in nature",
+    "gallery.title": "Our Territory",
+    "gallery.1": "Glamping territory",
+    "gallery.2": "Glamping interior",
+    "gallery.3": "Common area",
+    "gallery.4": "Natural landscape",
+    "gallery.5": "Interior decoration",
+    "gallery.6": "Evening view",
+    "modal.title": "Book a vacation",
+    "modal.date": "Visit date",
+    "modal.guests": "Number of guests",
+    "modal.guests_select": "Select a number",
+    "modal.guest_1": "1 guest",
+    "modal.guest_2": "2 guests",
+    "modal.guest_4": "4 guests",
+    "modal.guest_6": "6 guests",
+    "modal.guest_8": "8 guests",
+    "modal.name": "Full name",
+    "modal.email": "Email",
+    "modal.phone": "Phone number",
+    "modal.message": "Special requests (optional)",
+    "modal.submit": "Submit booking request",
+    "footer.title": "Place of Power",
+    "footer.desc": "Eco-glamping focused on unity with nature, peace and restoration of strength.",
+    "footer.nav": "Navigation",
+    "footer.contacts": "Contacts",
+    "footer.social": "Social Networks",
+    "footer.address": "📍 Tiraspol, Gorplauni Lane, 2, Tiraspol 3300",
+    "footer.phone": "📞 +373 778 404 81",
+    "footer.copyright": "&copy; 2026 Place of Power. All rights reserved."
+  }
+};

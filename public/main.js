@@ -1,3 +1,104 @@
+let currentLanguage = localStorage.getItem('language') || 'ru';
+let translations = {};
+
+function loadTranslations() {
+    translations = window.translations || {};
+    
+    if (Object.keys(translations).length === 0) {
+        console.error('Translations not loaded from languages.js');
+        return;
+    }
+    
+    updatePageText();
+    initializeLanguageSwitcher();
+}
+
+function t(key) {
+    const keys = key.split('.');
+    let value = translations[currentLanguage];
+    
+    for (const k of keys) {
+        if (value && typeof value === 'object') {
+            value = value[k];
+        } else {
+            console.warn(`Missing translation key: ${key}`);
+            return key;
+        }
+    }
+    
+    return value || key;
+}
+
+function updatePageText() {
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        const translatedText = t(key);
+        
+        if (element.tagName === 'OPTION') {
+            element.textContent = translatedText;
+        } else if (element.tagName === 'INPUT' && element.type === 'checkbox') {
+        } else {
+            element.textContent = translatedText;
+        }
+    });
+
+    document.querySelectorAll('[data-i18n-html]').forEach(element => {
+        const key = element.getAttribute('data-i18n-html');
+        element.innerHTML = t(key);
+    });
+}
+
+function initializeLanguageSwitcher() {
+    const langButtons = document.querySelectorAll('.lang-btn');
+    
+    if (langButtons.length === 0) {
+        console.warn('Language switcher buttons not found');
+        return;
+    }
+
+    updateFlagButtons();
+
+    langButtons.forEach(btn => {
+        btn.addEventListener('click', handleLanguageChange);
+    });
+}
+
+function handleLanguageChange(e) {
+    e.preventDefault();
+    const lang = this.getAttribute('data-lang');
+    setLanguage(lang);
+}
+
+function setLanguage(lang) {
+    if (!translations[lang]) {
+        console.warn(`Language not available: ${lang}`);
+        return;
+    }
+
+    currentLanguage = lang;
+    localStorage.setItem('language', lang);
+    
+    updatePageText();
+    updateFlagButtons();
+    
+    document.documentElement.lang = lang;
+}
+
+function updateFlagButtons() {
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    const activeBtn = document.querySelector(`[data-lang="${currentLanguage}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadTranslations();
+});
+
 const menuToggle = document.getElementById('menuToggle');
 const nav = document.getElementById('nav');
 
