@@ -65,6 +65,12 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Serve translations.json
+app.get('/translations.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.sendFile(path.join(__dirname, 'public', 'translations.json'));
+});
+
 // Explicitly serve admin.html
 app.get('/admin.html', (req, res) => {
     console.log('[ADMIN] Admin panel requested');
