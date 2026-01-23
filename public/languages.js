@@ -180,5 +180,3 @@ window.translations = {
     "footer.copyright": "&copy; 2026 Place of Power. All rights reserved."
   }
 };
-
-window.translationsLoaded = true;

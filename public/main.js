@@ -2,7 +2,7 @@ let currentLanguage = localStorage.getItem('language') || 'ru';
 let translations = null;
 
 function loadTranslations() {
-    if (!window.translationsLoaded || !window.translations) {
+    if (!window.translations) {
         setTimeout(loadTranslations, 50);
         return;
     }
