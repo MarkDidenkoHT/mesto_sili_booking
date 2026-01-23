@@ -231,4 +231,10 @@ window.translations = {
   }
 };
 
+const LANGUAGE_NAMES = {
+    ru: 'Русский',
+    md: 'Moldovenesc',
+    en: 'English'
+};
+
 console.log('window.translations set:', window.translations);

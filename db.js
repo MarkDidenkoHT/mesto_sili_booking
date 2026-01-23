@@ -19,7 +19,7 @@ function initializeDatabase() {
             email TEXT NOT NULL,
             phone TEXT NOT NULL,
             bookingDate TEXT NOT NULL,
-            guests INTEGER NOT NULL,
+            language TEXT DEFAULT 'ru',
             message TEXT,
             confirmed INTEGER DEFAULT 0,
             createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -37,14 +37,14 @@ function initializeDatabase() {
 function addBooking(bookingData) {
     return new Promise((resolve, reject) => {
         db.run(
-            `INSERT INTO bookings (name, email, phone, bookingDate, guests, message, confirmed) 
+            `INSERT INTO bookings (name, email, phone, bookingDate, language, message, confirmed) 
              VALUES (?, ?, ?, ?, ?, ?, 0)`,
             [
                 bookingData.name,
                 bookingData.email,
                 bookingData.phone,
                 bookingData.bookingDate,
-                bookingData.guests,
+                bookingData.language || 'ru',
                 bookingData.message || null
             ],
             function(err) {
@@ -139,9 +139,9 @@ function updateBooking(id, updateData) {
             fields.push('bookingDate = ?');
             values.push(updateData.bookingDate);
         }
-        if (updateData.guests !== undefined) {
-            fields.push('guests = ?');
-            values.push(updateData.guests);
+        if (updateData.language !== undefined) {
+            fields.push('language = ?');
+            values.push(updateData.language);
         }
         if (updateData.message !== undefined) {
             fields.push('message = ?');

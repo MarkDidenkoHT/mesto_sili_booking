@@ -92,12 +92,51 @@ app.get('/api/booked-dates', async (req, res) => {
     }
 });
 
+const TELEGRAM_BOT_TOKEN = '7000627860:AAGsYahsW5lVrMyhyy-cGst2fMTx962ktOg';
+const TELEGRAM_CHAT_ID = '-3498233200';
+
+async function sendTelegramNotification(booking) {
+    try {
+        const languageName = { ru: 'Русский', md: 'Moldovenesc', en: 'English' }[booking.language] || booking.language;
+        const message = `
+📅 <b>Новое бронирование!</b>
+
+👤 <b>Имя:</b> ${booking.name}
+📧 <b>Email:</b> ${booking.email}
+📞 <b>Телефон:</b> ${booking.phone}
+📍 <b>Дата посещения:</b> ${booking.bookingDate}
+🌐 <b>Язык клиента:</b> ${languageName}
+💬 <b>Пожелания:</b> ${booking.message || 'Нет'}
+
+ID бронирования: #${booking.id}
+`;
+        
+        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: TELEGRAM_CHAT_ID,
+                text: message,
+                parse_mode: 'HTML'
+            })
+        });
+
+        if (!response.ok) {
+            console.error('[TELEGRAM] Error sending notification:', response.statusText);
+        } else {
+            console.log('[TELEGRAM] Notification sent for booking #' + booking.id);
+        }
+    } catch (error) {
+        console.error('[TELEGRAM] Error:', error);
+    }
+}
+
 app.post('/api/bookings', bookingLimiter, async (req, res) => {
     try {
         console.log('[API] New booking submission:', { name: req.body.name, email: req.body.email });
-        const { name, email, phone, bookingDate, guests, message } = req.body;
+        const { name, email, phone, bookingDate, message, language } = req.body;
 
-        if (!name || !email || !phone || !bookingDate || !guests) {
+        if (!name || !email || !phone || !bookingDate) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
@@ -123,9 +162,22 @@ app.post('/api/bookings', bookingLimiter, async (req, res) => {
             email: email.substring(0, 100),
             phone: phone.substring(0, 20),
             bookingDate,
-            guests: parseInt(guests),
+            language: language || 'ru',
             message: message ? message.substring(0, 500) : null
         });
+
+        const newBooking = {
+            id: result.id,
+            name: name.substring(0, 100),
+            email: email.substring(0, 100),
+            phone: phone.substring(0, 20),
+            bookingDate,
+            language: language || 'ru',
+            message: message ? message.substring(0, 500) : null
+        };
+
+        // Send Telegram notification
+        sendTelegramNotification(newBooking);
 
         console.log('[API] Booking created:', result.id);
         res.json({ success: true, bookingId: result.id, message: 'Booking created successfully' });

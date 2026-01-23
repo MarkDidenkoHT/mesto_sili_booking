@@ -137,7 +137,7 @@ function renderBookings(bookings) {
     bookingsBody.innerHTML = '';
     
     if (bookings.length === 0) {
-        bookingsBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px;">Бронирования не найдены</td></tr>';
+        bookingsBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Бронирования не найдены</td></tr>';
         return;
     }
     
@@ -145,13 +145,14 @@ function renderBookings(bookings) {
         const row = document.createElement('tr');
         const statusClass = booking.confirmed ? 'status-confirmed' : 'status-pending';
         const statusText = booking.confirmed ? 'Подтверждено' : 'Ожидает';
+        const languageName = { ru: 'Русский', md: 'Moldovenesc', en: 'English' }[booking.language] || booking.language;
         row.innerHTML = `
             <td>${booking.id}</td>
             <td>${booking.name}</td>
             <td>${booking.email}</td>
             <td>${booking.phone}</td>
             <td>${booking.bookingDate}</td>
-            <td>${booking.guests}</td>
+            <td>${languageName}</td>
             <td><span class="status-badge ${statusClass}">${statusText}</span></td>
             <td>
                 <div class="actions-cell">
@@ -208,8 +209,8 @@ async function editBooking(id) {
         document.getElementById('bName').value = booking.name;
         document.getElementById('bEmail').value = booking.email;
         document.getElementById('bPhone').value = booking.phone;
-        document.getElementById('bGuests').value = booking.guests;
         document.getElementById('bBookingDate').value = booking.bookingDate;
+        document.getElementById('bLanguage').value = booking.language || 'ru';
         document.getElementById('bMessage').value = booking.message || '';
         document.getElementById('bConfirmed').checked = booking.confirmed === 1;
         
@@ -253,8 +254,8 @@ bookingForm.addEventListener('submit', async (e) => {
         name: formData.get('name'),
         email: formData.get('email'),
         phone: formData.get('phone'),
-        guests: formData.get('guests'),
         bookingDate: formData.get('bookingDate'),
+        language: formData.get('language'),
         message: formData.get('message'),
         confirmed: formData.get('confirmed') === 'on'
     };

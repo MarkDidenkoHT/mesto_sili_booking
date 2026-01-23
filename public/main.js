@@ -248,6 +248,9 @@ bookingForm.addEventListener('submit', async (e) => {
         return;
     }
     
+
+    data.language = currentLanguage;
+    
     try {
         const response = await fetch('/api/bookings', {
             method: 'POST',
@@ -263,7 +266,7 @@ bookingForm.addEventListener('submit', async (e) => {
             return;
         }
 
-        alert(`Спасибо за вашу заявку на бронирование!\n\nДетали:\nДата посещения: ${data.bookingDate}\nГостей: ${data.guests}\n\nМы свяжемся с вами по номеру ${data.phone} в течение 24 часов для подтверждения бронирования.`);
+        alert(`Спасибо за вашу заявку на бронирование!\n\nДетали:\nДата посещения: ${data.bookingDate}\n\nМы свяжемся с вами по номеру ${data.phone} в течение 24 часов для подтверждения бронирования.`);
 
         bookingForm.reset();
         closeBookingModal();
