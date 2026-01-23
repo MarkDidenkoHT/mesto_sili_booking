@@ -1,17 +1,19 @@
 let currentLanguage = localStorage.getItem('language') || 'ru';
+let translations = null;
 
 function loadTranslations() {
-    const translations = window.translations;
+    translations = window.translations;
     
     if (!translations || Object.keys(translations).length === 0) {
+        setTimeout(loadTranslations, 100);
         return;
     }
     
-    updatePageText(translations);
-    initializeLanguageSwitcher(translations);
+    updatePageText();
+    initializeLanguageSwitcher();
 }
 
-function t(key, translations) {
+function t(key) {
     const keys = key.split('.');
     let value = translations[currentLanguage];
     
@@ -26,10 +28,10 @@ function t(key, translations) {
     return value || key;
 }
 
-function updatePageText(translations) {
+function updatePageText() {
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
-        const translatedText = t(key, translations);
+        const translatedText = t(key);
         
         if (element.tagName === 'OPTION') {
             element.textContent = translatedText;
@@ -40,11 +42,11 @@ function updatePageText(translations) {
 
     document.querySelectorAll('[data-i18n-html]').forEach(element => {
         const key = element.getAttribute('data-i18n-html');
-        element.innerHTML = t(key, translations);
+        element.innerHTML = t(key);
     });
 }
 
-function initializeLanguageSwitcher(translations) {
+function initializeLanguageSwitcher() {
     const langButtons = document.querySelectorAll('.lang-btn');
     
     updateFlagButtons();
@@ -53,17 +55,17 @@ function initializeLanguageSwitcher(translations) {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             const lang = btn.getAttribute('data-lang');
-            setLanguage(lang, translations);
+            setLanguage(lang);
         });
     });
 }
 
-function setLanguage(lang, translations) {
+function setLanguage(lang) {
     if (!translations[lang]) return;
     
     currentLanguage = lang;
     localStorage.setItem('language', lang);
-    updatePageText(translations);
+    updatePageText();
     updateFlagButtons();
     document.documentElement.lang = lang;
 }
