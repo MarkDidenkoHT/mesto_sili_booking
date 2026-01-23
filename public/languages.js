@@ -1,5 +1,3 @@
-console.log('languages.js loading...');
-
 window.translations = {
   "ru": {
     "nav": {
@@ -236,5 +234,3 @@ const LANGUAGE_NAMES = {
     md: 'Moldovenesc',
     en: 'English'
 };
-
-console.log('window.translations set:', window.translations);

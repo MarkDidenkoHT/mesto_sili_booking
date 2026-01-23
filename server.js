@@ -93,7 +93,7 @@ app.get('/api/booked-dates', async (req, res) => {
 });
 
 const TELEGRAM_BOT_TOKEN = '7000627860:AAGsYahsW5lVrMyhyy-cGst2fMTx962ktOg';
-const TELEGRAM_CHAT_ID = '-3498233200';
+const TELEGRAM_CHAT_ID = '-1003498233200';
 
 async function sendTelegramNotification(booking) {
     try {

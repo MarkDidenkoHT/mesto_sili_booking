@@ -2,23 +2,18 @@ let currentLanguage = localStorage.getItem('language') || 'ru';
 let translations = null;
 
 function loadTranslations() {
-    console.log('loadTranslations called');
-    console.log('window.translations:', window.translations);
     
     if (!window.translations) {
-        console.log('translations not loaded yet, retrying...');
         setTimeout(loadTranslations, 50);
         return;
     }
     
     translations = window.translations;
-    console.log('translations loaded:', translations);
     updatePageText();
     initializeLanguageSwitcher();
 }
 
 function t(key) {
-    console.log('Translating key:', key, 'for language:', currentLanguage);
     const keys = key.split('.');
     let value = translations[currentLanguage];
     
@@ -26,12 +21,10 @@ function t(key) {
         if (value && typeof value === 'object') {
             value = value[k];
         } else {
-            console.log('Translation not found for:', key);
             return key;
         }
     }
     
-    console.log('Translation result:', value);
     return value || key;
 }
 
