@@ -47,15 +47,20 @@ function updatePageText() {
 }
 
 const languageSwitcher = document.getElementById('languageSwitcher');
-const langOptions = ['ru', 'en', 'fr'];
+const langOptions = [
+    { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'ro', name: 'Română', flag: '🇷🇴' }
+];
 
 function initializeLanguageSwitcher() {
     langOptions.forEach(lang => {
         const option = document.createElement('option');
-        option.value = lang;
-        option.textContent = lang.toUpperCase();
+        option.value = lang.code;
+        option.textContent = `${lang.flag} ${lang.name}`;
         languageSwitcher.appendChild(option);
     });
+    languageSwitcher.value = currentLanguage;
     languageSwitcher.addEventListener('change', (e) => {
         setLanguage(e.target.value);
     });
@@ -72,12 +77,7 @@ function setLanguage(lang) {
 }
 
 function updateFlagButtons() {
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    const activeBtn = document.querySelector(`[data-lang="${currentLanguage}"]`);
-    if (activeBtn) activeBtn.classList.add('active');
+    languageSwitcher.value = currentLanguage;
 }
 
 document.addEventListener('DOMContentLoaded', function() {

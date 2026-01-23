@@ -75,7 +75,7 @@ window.translations = {
       "copyright": "&copy; 2026 Место силы. Все права защищены."
     }
   },
-  "md": {
+  "ro": {
     "nav": {
       "home": "Acasă",
       "about": "Despre noi",
