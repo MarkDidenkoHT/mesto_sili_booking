@@ -92,11 +92,14 @@ app.get('/api/booked-dates', async (req, res) => {
     }
 });
 
+
 const TELEGRAM_BOT_TOKEN = '7000627860:AAGsYahsW5lVrMyhyy-cGst2fMTx962ktOg';
 const TELEGRAM_CHAT_ID = '-1003498233200';
 
 async function sendTelegramNotification(booking) {
     try {
+        console.log('[TELEGRAM] Sending notification to chat ID:', TELEGRAM_CHAT_ID);
+        
         const languageName = { ru: 'Русский', md: 'Moldovenesc', en: 'English' }[booking.language] || booking.language;
         const message = `
 📅 <b>Новое бронирование!</b>
@@ -121,13 +124,16 @@ ID бронирования: #${booking.id}
             })
         });
 
+        const result = await response.json();
+        console.log('[TELEGRAM] API response:', result);
+        
         if (!response.ok) {
-            console.error('[TELEGRAM] Error sending notification:', response.statusText);
+            console.error('[TELEGRAM] Error:', result.description || 'Unknown error');
         } else {
-            console.log('[TELEGRAM] Notification sent for booking #' + booking.id);
+            console.log('[TELEGRAM] ✓ Notification sent for booking #' + booking.id);
         }
     } catch (error) {
-        console.error('[TELEGRAM] Error:', error);
+        console.error('[TELEGRAM] Network error:', error.message);
     }
 }
 
