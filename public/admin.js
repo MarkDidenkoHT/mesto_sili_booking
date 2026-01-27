@@ -104,6 +104,8 @@ function populateYearFilter() {
     }
 }
 
+document.getElementById('refreshBookingsBtn').addEventListener('click', loadBookings);
+
 async function loadBookings() {
     try {
         console.log('[ADMIN-JS] Loading bookings...');
@@ -120,6 +122,12 @@ async function loadBookings() {
         });
         
         console.log('[ADMIN-JS] Bookings response status:', response.status);
+        
+        if (response.status === 401) {
+            alert('Сессия истекла. Пожалуйста, войдите снова.');
+            showLogin();
+            return;
+        }
         
         if (!response.ok) throw new Error('Failed to load bookings');
         
