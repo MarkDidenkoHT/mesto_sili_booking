@@ -41,13 +41,11 @@ function updatePageText() {
         }
     });
 
-    // Update HTML content
     document.querySelectorAll('[data-i18n-html]').forEach(element => {
         const key = element.getAttribute('data-i18n-html');
         element.innerHTML = t(key);
     });
 
-    // Update placeholders
     document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
         const key = element.getAttribute('data-i18n-placeholder');
         const translatedPlaceholder = t(key);
@@ -92,6 +90,73 @@ function updateFlagButtons() {
 document.addEventListener('DOMContentLoaded', function() {
     loadTranslations();
 });
+
+function showNotification(type, title, message, duration = 5000) {
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    
+    const icon = type === 'error' ? '⚠️' : '✓';
+    
+    notification.innerHTML = `
+        <div class="notification-icon">${icon}</div>
+        <div class="notification-content">
+            <div class="notification-title">${title}</div>
+            <div class="notification-message">${message}</div>
+        </div>
+        <button class="notification-close" onclick="this.parentElement.remove()">×</button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.add('show'), 10);
+    
+    if (duration > 0) {
+        setTimeout(() => {
+            notification.classList.add('hide');
+            setTimeout(() => notification.remove(), 300);
+        }, duration);
+    }
+}
+
+function showError(messageKey) {
+    const title = type === 'error' ? '❌ Ошибка' : '✓ Успешно';
+    const message = t(`errors.${messageKey}`);
+    showNotification('error', title, message);
+}
+
+function showSuccess(messageKey, replacements = {}) {
+    const title = t('success.booking_title');
+    let message = t(`success.${messageKey}`);
+    
+    Object.keys(replacements).forEach(key => {
+        message = message.replace(`{${key}}`, replacements[key]);
+    });
+    
+    showNotification('success', title, message, 8000);
+}
+
+function getErrorTitle() {
+    const titles = {
+        ru: '❌ Ошибка',
+        ro: '❌ Eroare',
+        en: '❌ Error'
+    };
+    return titles[currentLanguage] || titles['en'];
+}
+
+function getSuccessTitle() {
+    const titles = {
+        ru: '✓ Успешно',
+        ro: '✓ Succes',
+        en: '✓ Success'
+    };
+    return titles[currentLanguage] || titles['en'];
+}
 
 const menuToggle = document.getElementById('menuToggle');
 const nav = document.getElementById('nav');
@@ -215,12 +280,12 @@ function initializeDatePicker() {
         dateFormat: 'Y-m-d',
         disable: disabledDates,
         onChange: function(selectedDates, dateStr, instance) {
-            checkInInput.classList.remove('booked');
+            checkInInput.classList.remove('booked', 'error');
             if (bookedDatesSet.has(dateStr)) {
-                checkInInput.classList.add('booked');
+                checkInInput.classList.add('booked', 'error');
                 instance.clear();
                 setTimeout(() => {
-                    alert('Выбранная дата уже забронирована. Пожалуйста, выберите другую дату.');
+                    showNotification('error', getErrorTitle(), t('errors.date_booked'));
                 }, 10);
             }
         },
@@ -233,38 +298,44 @@ function initializeDatePicker() {
 const bookingForm = document.getElementById('bookingForm');
 const phoneInput = document.getElementById('phone');
 
-// Remove strict phone validation - allow any format
-phoneInput.addEventListener('input', (e) => {
-    // Allow any characters, just trim whitespace at start/end when submitting
-    // No formatting or validation during input
-});
-
 bookingForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    document.querySelectorAll('.form-group input, .form-group textarea').forEach(input => {
+        input.classList.remove('error', 'success');
+    });
+    
     const formData = new FormData(bookingForm);
     const data = Object.fromEntries(formData);
+    
     const bookingDate = new Date(data.bookingDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     if (bookingDate < today) {
-        alert('Дата посещения не может быть в прошлом');
+        showNotification('error', getErrorTitle(), t('errors.past_date'));
+        document.getElementById('bookingDate').classList.add('error');
         return;
     }
 
     if (bookedDatesSet.has(data.bookingDate)) {
-        alert('К сожалению, выбранная дата уже забронирована. Пожалуйста, выберите другую дату.');
+        showNotification('error', getErrorTitle(), t('errors.date_booked'));
+        document.getElementById('bookingDate').classList.add('error');
         return;
     }
     
-    // Trim phone number but allow any format
     data.phone = data.phone.trim();
-    
-    // Basic validation - just check if phone has at least some digits
     const hasDigits = /\d/.test(data.phone);
     if (!hasDigits) {
-        alert('Пожалуйста, введите корректный номер телефона');
+        showNotification('error', getErrorTitle(), t('errors.invalid_phone'));
+        phoneInput.classList.add('error');
+        return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+        showNotification('error', getErrorTitle(), t('errors.invalid_email'));
+        document.getElementById('email').classList.add('error');
         return;
     }
 
@@ -281,18 +352,34 @@ bookingForm.addEventListener('submit', async (e) => {
 
         if (!response.ok) {
             const error = await response.json();
-            alert('Ошибка: ' + (error.error || 'Не удалось создать бронирование'));
+            showNotification('error', getErrorTitle(), error.error || t('errors.booking_failed'));
             return;
         }
 
-        alert(`Спасибо за вашу заявку на бронирование!\n\nДетали:\nДата посещения: ${data.bookingDate}\n\nМы свяжемся с вами по номеру ${data.phone} в течение 24 часов для подтверждения бронирования.`);
+        let successMessage = t('success.booking_message')
+            .replace('{phone}', data.phone);
+        
+        const dateInfo = t('success.booking_date').replace('{date}', data.bookingDate);
+        successMessage = dateInfo + '\n\n' + successMessage;
 
-        bookingForm.reset();
-        closeBookingModal();
+        showNotification('success', t('success.booking_title'), successMessage, 8000);
+
+        document.querySelectorAll('.form-group input, .form-group textarea').forEach(input => {
+            if (input.value) input.classList.add('success');
+        });
+
+        setTimeout(() => {
+            bookingForm.reset();
+            closeBookingModal();
+            document.querySelectorAll('.form-group input, .form-group textarea').forEach(input => {
+                input.classList.remove('success');
+            });
+        }, 2000);
+        
         loadBookedDates();
     } catch (error) {
         console.error('Booking error:', error);
-        alert('Ошибка при отправке бронирования. Пожалуйста, попробуйте позже.');
+        showNotification('error', getErrorTitle(), t('errors.network_error'));
     }
 });
 

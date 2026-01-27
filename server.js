@@ -148,7 +148,7 @@ app.post('/api/bookings', bookingLimiter, async (req, res) => {
             return res.status(400).json({ error: 'Invalid email format' });
         }
 
-        if (phone.length < 10) {
+        if (phone.length < 8) {
             return res.status(400).json({ error: 'Invalid phone number' });
         }
 
@@ -179,7 +179,6 @@ app.post('/api/bookings', bookingLimiter, async (req, res) => {
             message: message ? message.substring(0, 500) : null
         };
 
-        // Send Telegram notification
         sendTelegramNotification(newBooking);
 
         console.log('[API] Booking created:', result.id);

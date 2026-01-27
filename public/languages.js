@@ -73,6 +73,20 @@ window.translations = {
       "address": "Тирасполь, пер. Горплавни, 2, Tiraspol 3300",
       "phone": "+373 778 404 81",
       "copyright": "&copy; 2026 Место силы. Все права защищены."
+    },
+    "errors": {
+    "past_date": "Дата посещения не может быть в прошлом",
+    "date_booked": "К сожалению, выбранная дата уже забронирована. Пожалуйста, выберите другую дату.",
+    "invalid_phone": "Пожалуйста, введите корректный номер телефона",
+    "booking_failed": "Ошибка при отправке бронирования. Пожалуйста, попробуйте позже.",
+    "network_error": "Проблема с подключением. Проверьте интернет-соединение.",
+    "missing_fields": "Пожалуйста, заполните все обязательные поля",
+    "invalid_email": "Пожалуйста, введите корректный email адрес"
+    },
+    "success": {
+      "booking_title": "Спасибо за вашу заявку!",
+      "booking_message": "Мы свяжемся с вами по номеру {phone} в течение 24 часов для подтверждения бронирования.",
+      "booking_date": "Дата посещения: {date}"
     }
   },
   "ro": {
@@ -149,6 +163,20 @@ window.translations = {
       "address": "Tiraspol, str. Gorplauni, 2, Tiraspol 3300",
       "phone": "+373 778 404 81",
       "copyright": "&copy; 2026 Loc de putere. Toate drepturile sunt rezervate."
+    },
+    "errors": {
+    "past_date": "Data vizitei nu poate fi în trecut",
+    "date_booked": "Din păcate, data selectată este deja rezervată. Vă rugăm să alegeți o altă dată.",
+    "invalid_phone": "Vă rugăm să introduceți un număr de telefon valid",
+    "booking_failed": "Eroare la trimiterea rezervării. Vă rugăm să încercați mai târziu.",
+    "network_error": "Problemă de conexiune. Verificați conexiunea la internet.",
+    "missing_fields": "Vă rugăm să completați toate câmpurile obligatorii",
+    "invalid_email": "Vă rugăm să introduceți o adresă de email validă"
+    },
+    "success": {
+      "booking_title": "Vă mulțumim pentru cererea dumneavoastră!",
+      "booking_message": "Vă vom contacta la numărul {phone} în 24 de ore pentru confirmarea rezervării.",
+      "booking_date": "Data vizitei: {date}"
     }
   },
   "en": {
@@ -225,6 +253,20 @@ window.translations = {
       "address": "Tiraspol, Gorplauni Lane, 2, Tiraspol 3300",
       "phone": "+373 778 404 81",
       "copyright": "&copy; 2026 Place of Power. All rights reserved."
+    },
+    "errors": {
+    "past_date": "Visit date cannot be in the past",
+    "date_booked": "Unfortunately, the selected date is already booked. Please choose another date.",
+    "invalid_phone": "Please enter a valid phone number",
+    "booking_failed": "Error submitting booking. Please try again later.",
+    "network_error": "Connection problem. Please check your internet connection.",
+    "missing_fields": "Please fill in all required fields",
+    "invalid_email": "Please enter a valid email address"
+    },
+    "success": {
+      "booking_title": "Thank you for your booking request!",
+      "booking_message": "We will contact you at {phone} within 24 hours to confirm your booking.",
+      "booking_date": "Visit date: {date}"
     }
   }
 };
