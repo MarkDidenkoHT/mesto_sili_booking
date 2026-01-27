@@ -512,12 +512,6 @@ body {
     gap: 15px;
 }
 
-.form-row {
-    /*display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;*/
-}
-
 .form-group {
     display: flex;
     flex-direction: column;
@@ -539,6 +533,12 @@ body {
     font-size: 14px;
     transition: border-color 0.3s ease;
     font-family: inherit;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #999;
+    opacity: 1;
 }
 
 .form-group input:focus,

@@ -51,18 +51,18 @@ window.translations = {
     "modal": {
       "title": "Забронировать отдых",
       "date": "Дата посещения",
-      "guests": "Количество гостей",
-      "guests_select": "Выберите количество",
-      "guest_1": "1 гость",
-      "guest_2": "2 гостя",
-      "guest_4": "4 гостя",
-      "guest_6": "6 гостей",
-      "guest_8": "8 гостей",
       "name": "ФИО",
       "email": "Email",
       "phone": "Номер телефона",
       "message": "Особые пожелания (необязательно)",
-      "submit": "Отправить заявку на бронирование"
+      "submit": "Отправить заявку на бронирование",
+      "placeholder": {
+        "date": "Выберите дату",
+        "name": "Введите ваше имя",
+        "email": "example@mail.com",
+        "phone": "Введите номер телефона",
+        "message": "Напишите ваши пожелания..."
+      }
     },
     "footer": {
       "title": "Место силы",
@@ -70,8 +70,8 @@ window.translations = {
       "nav": "Навигация",
       "contacts": "Контакты",
       "social": "Социальные сети",
-      "address": "📍 Тирасполь, пер. Горплавни, 2, Tiraspol 3300",
-      "phone": "📞 +373 778 404 81",
+      "address": "Тирасполь, пер. Горплавни, 2, Tiraspol 3300",
+      "phone": "+373 778 404 81",
       "copyright": "&copy; 2026 Место силы. Все права защищены."
     }
   },
@@ -127,18 +127,18 @@ window.translations = {
     "modal": {
       "title": "Rezervă o vacanță",
       "date": "Data vizitei",
-      "guests": "Numărul de oaspeți",
-      "guests_select": "Alegeți numărul",
-      "guest_1": "1 oaspete",
-      "guest_2": "2 oaspeți",
-      "guest_4": "4 oaspeți",
-      "guest_6": "6 oaspeți",
-      "guest_8": "8 oaspeți",
       "name": "Nume complet",
       "email": "Email",
       "phone": "Numărul de telefon",
       "message": "Cerințe speciale (opțional)",
-      "submit": "Trimiteți cererea de rezervare"
+      "submit": "Trimiteți cererea de rezervare",
+      "placeholder": {
+        "date": "Selectați data",
+        "name": "Introduceți numele dumneavoastră",
+        "email": "exemplu@mail.com",
+        "phone": "Introduceți numărul de telefon",
+        "message": "Scrieți dorințele dvs..."
+      }
     },
     "footer": {
       "title": "Loc de putere",
@@ -146,8 +146,8 @@ window.translations = {
       "nav": "Navigare",
       "contacts": "Contacte",
       "social": "Rețele sociale",
-      "address": "📍 Tiraspol, str. Gorplauni, 2, Tiraspol 3300",
-      "phone": "📞 +373 778 404 81",
+      "address": "Tiraspol, str. Gorplauni, 2, Tiraspol 3300",
+      "phone": "+373 778 404 81",
       "copyright": "&copy; 2026 Loc de putere. Toate drepturile sunt rezervate."
     }
   },
@@ -203,18 +203,18 @@ window.translations = {
     "modal": {
       "title": "Book a vacation",
       "date": "Visit date",
-      "guests": "Number of guests",
-      "guests_select": "Select a number",
-      "guest_1": "1 guest",
-      "guest_2": "2 guests",
-      "guest_4": "4 guests",
-      "guest_6": "6 guests",
-      "guest_8": "8 guests",
       "name": "Full name",
       "email": "Email",
       "phone": "Phone number",
       "message": "Special requests (optional)",
-      "submit": "Submit booking request"
+      "submit": "Submit booking request",
+      "placeholder": {
+        "date": "Select a date",
+        "name": "Enter your name",
+        "email": "example@mail.com",
+        "phone": "Enter phone number",
+        "message": "Write your requests..."
+      }
     },
     "footer": {
       "title": "Place of Power",
@@ -222,8 +222,8 @@ window.translations = {
       "nav": "Navigation",
       "contacts": "Contacts",
       "social": "Social Networks",
-      "address": "📍 Tiraspol, Gorplauni Lane, 2, Tiraspol 3300",
-      "phone": "📞 +373 778 404 81",
+      "address": "Tiraspol, Gorplauni Lane, 2, Tiraspol 3300",
+      "phone": "+373 778 404 81",
       "copyright": "&copy; 2026 Place of Power. All rights reserved."
     }
   }

@@ -29,6 +29,7 @@ function t(key) {
 }
 
 function updatePageText() {
+    // Update text content
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
         const translatedText = t(key);
@@ -40,9 +41,17 @@ function updatePageText() {
         }
     });
 
+    // Update HTML content
     document.querySelectorAll('[data-i18n-html]').forEach(element => {
         const key = element.getAttribute('data-i18n-html');
         element.innerHTML = t(key);
+    });
+
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        const translatedPlaceholder = t(key);
+        element.placeholder = translatedPlaceholder;
     });
 }
 
@@ -222,6 +231,13 @@ function initializeDatePicker() {
 }
 
 const bookingForm = document.getElementById('bookingForm');
+const phoneInput = document.getElementById('phone');
+
+// Remove strict phone validation - allow any format
+phoneInput.addEventListener('input', (e) => {
+    // Allow any characters, just trim whitespace at start/end when submitting
+    // No formatting or validation during input
+});
 
 bookingForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -242,6 +258,15 @@ bookingForm.addEventListener('submit', async (e) => {
         return;
     }
     
+    // Trim phone number but allow any format
+    data.phone = data.phone.trim();
+    
+    // Basic validation - just check if phone has at least some digits
+    const hasDigits = /\d/.test(data.phone);
+    if (!hasDigits) {
+        alert('Пожалуйста, введите корректный номер телефона');
+        return;
+    }
 
     data.language = currentLanguage;
     
