@@ -100,7 +100,7 @@ function showNotification(type, title, message, duration = 5000) {
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     
-    const icon = type === 'error' ? '⚠️' : '✓';
+    const icon = type === 'error' ? '' : '✓';
     
     notification.innerHTML = `
         <div class="notification-icon">${icon}</div>
