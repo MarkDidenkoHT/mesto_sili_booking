@@ -140,16 +140,16 @@ app.post('/api/bookings', bookingLimiter, async (req, res) => {
         const { name, email, phone, bookingDate, message, language } = req.body;
 
         if (!name || !email || !phone || !bookingDate) {
-            return res.status(400).json({ error: 'Missing required fields' });
+            return res.status(400).json({ errorCode: 'missing_fields' });
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            return res.status(400).json({ error: 'Invalid email format' });
+            return res.status(400).json({ errorCode: 'invalid_email' });
         }
 
         if (phone.length < 8) {
-            return res.status(400).json({ error: 'Invalid phone number' });
+            return res.status(400).json({ errorCode: 'invalid_phone' });
         }
 
         const bookingDateObj = new Date(bookingDate);
@@ -157,7 +157,7 @@ app.post('/api/bookings', bookingLimiter, async (req, res) => {
         today.setHours(0, 0, 0, 0);
 
         if (bookingDateObj < today) {
-            return res.status(400).json({ error: 'Booking date cannot be in the past' });
+            return res.status(400).json({ errorCode: 'past_date' });
         }
 
         const result = await addBooking({
@@ -185,7 +185,7 @@ app.post('/api/bookings', bookingLimiter, async (req, res) => {
         res.json({ success: true, bookingId: result.id, message: 'Booking created successfully' });
     } catch (error) {
         console.error('[API] Error creating booking:', error);
-        res.status(500).json({ error: 'Failed to create booking' });
+        res.status(500).json({ errorCode: 'booking_failed' });
     }
 });
 

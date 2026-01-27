@@ -352,7 +352,15 @@ bookingForm.addEventListener('submit', async (e) => {
 
         if (!response.ok) {
             const error = await response.json();
-            showNotification('error', getErrorTitle(), error.error || t('errors.booking_failed'));
+            const errorMessage = error.errorCode ? t(`errors.${error.errorCode}`) : t('errors.booking_failed');
+            showNotification('error', getErrorTitle(), errorMessage);
+            if (error.errorCode === 'invalid_email') {
+                document.getElementById('email').classList.add('error');
+            } else if (error.errorCode === 'invalid_phone') {
+                phoneInput.classList.add('error');
+            } else if (error.errorCode === 'past_date') {
+                document.getElementById('bookingDate').classList.add('error');
+            }
             return;
         }
 
