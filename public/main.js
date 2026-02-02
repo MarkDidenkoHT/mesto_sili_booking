@@ -249,6 +249,8 @@ const checkInInput = document.getElementById('bookingDate');
 let bookedDates = [];
 let bookedDatesSet = new Set();
 let flatpickrInstance = null;
+let bookedSlots = []; // [{ bookingDate, startTime, endTime, resourceType }, ...]
+
 
 async function loadBookedDates() {
     try {
@@ -256,11 +258,54 @@ async function loadBookedDates() {
         if (!response.ok) throw new Error('Failed to fetch booked dates');
         const data = await response.json();
         bookedDates = data.bookedDates;
+        bookedSlots = data.bookedDates || [];
         bookedDatesSet = new Set(bookedDates.map(b => b.bookingDate));
         initializeDatePicker();
     } catch (error) {
         console.error('Error loading booked dates:', error);
     }
+}
+
+function timeToMinutes(t) {
+    const parts = (t || '').split(':').map(Number);
+    if (parts.length !== 2 || !Number.isFinite(parts[0]) || !Number.isFinite(parts[1])) return null;
+    return parts[0] * 60 + parts[1];
+}
+
+function checkLocalTimeConstraints(resource, dateStr, startTime, endTime) {
+    const startMin = timeToMinutes(startTime);
+    const endMin = timeToMinutes(endTime);
+    if (startMin === null || endMin === null) {
+        return { ok: false, code: 'invalid_time_format' };
+    }
+    if (startMin >= endMin) {
+        return { ok: false, code: 'invalid_time_range' };
+    }
+    const durationHours = (endMin - startMin) / 60;
+    const minHours = resource === 'sauna' ? 4 : 2;
+    if (durationHours < minHours) {
+        return { ok: false, code: resource === 'sauna' ? 'min_duration_sauna' : 'min_duration_veranda' };
+    }
+
+    // conflict check with confirmed bookings for same resource and date
+    for (const eb of bookedSlots) {
+        if (eb.resourceType !== resource || eb.bookingDate !== dateStr) continue;
+        const ebStart = timeToMinutes(eb.startTime);
+        const ebEnd = timeToMinutes(eb.endTime);
+        if (ebStart === null || ebEnd === null) continue;
+
+        const gapExisting = eb.resourceType === 'sauna' ? 120 : 60;
+        const gapNew = resource === 'sauna' ? 120 : 60;
+
+        const ok1 = (ebEnd + gapExisting) <= startMin;
+        const ok2 = (endMin + gapNew) <= ebStart;
+
+        if (!(ok1 || ok2)) {
+            return { ok: false, code: 'time_conflict' };
+        }
+    }
+
+    return { ok: true };
 }
 
 function initializeDatePicker() {
@@ -307,7 +352,6 @@ bookingForm.addEventListener('submit', async (e) => {
     
     const formData = new FormData(bookingForm);
     const data = Object.fromEntries(formData);
-    
     const bookingDate = new Date(data.bookingDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -318,12 +362,26 @@ bookingForm.addEventListener('submit', async (e) => {
         return;
     }
 
-    if (bookedDatesSet.has(data.bookingDate)) {
-        showNotification('error', getErrorTitle(), t('errors.date_booked'));
-        document.getElementById('bookingDate').classList.add('error');
+    if (!data.startTime || !data.endTime || !data.resource) {
+        showNotification('error', getErrorTitle(), t('errors.missing_time_or_resource'));
         return;
     }
-    
+
+    const timeCheck = checkLocalTimeConstraints(data.resource, data.bookingDate, data.startTime, data.endTime);
+    if (!timeCheck.ok) {
+        const msgKey = timeCheck.code;
+        showNotification('error', getErrorTitle(), t(`errors.${msgKey}`));
+        if (msgKey === 'invalid_time_range') {
+            document.getElementById('startTime').classList.add('error');
+            document.getElementById('endTime').classList.add('error');
+        } else if (msgKey === 'time_conflict') {
+            document.getElementById('startTime').classList.add('error');
+            document.getElementById('endTime').classList.add('error');
+            document.getElementById('bookingDate').classList.add('error');
+        }
+        return;
+    }
+
     data.phone = data.phone.trim();
     const hasDigits = /\d/.test(data.phone);
     if (!hasDigits) {
@@ -347,19 +405,26 @@ bookingForm.addEventListener('submit', async (e) => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                name: data.name,
+                email: data.email,
+                phone: data.phone,
+                bookingDate: data.bookingDate,
+                startTime: data.startTime,
+                endTime: data.endTime,
+                resourceType: data.resource,
+                message: data.message || '',
+                language: data.language
+            })
         });
 
         if (!response.ok) {
             const error = await response.json();
             const errorMessage = error.errorCode ? t(`errors.${error.errorCode}`) : t('errors.booking_failed');
             showNotification('error', getErrorTitle(), errorMessage);
-            if (error.errorCode === 'invalid_email') {
-                document.getElementById('email').classList.add('error');
-            } else if (error.errorCode === 'invalid_phone') {
-                phoneInput.classList.add('error');
-            } else if (error.errorCode === 'past_date') {
-                document.getElementById('bookingDate').classList.add('error');
+            if (error.errorCode === 'invalid_time_range' || error.errorCode === 'time_conflict' || error.errorCode === 'min_duration_sauna' || error.errorCode === 'min_duration_veranda') {
+                document.getElementById('startTime').classList.add('error');
+                document.getElementById('endTime').classList.add('error');
             }
             return;
         }

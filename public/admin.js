@@ -197,7 +197,7 @@ function renderBookings(bookings) {
     if (bookings.length === 0) {
         bookingsBody.innerHTML = `
             <tr class="empty-state">
-                <td colspan="7">
+                <td colspan="9">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                         <line x1="16" y1="2" x2="16" y2="6"/>
@@ -228,6 +228,9 @@ function renderBookings(bookings) {
             day: 'numeric'
         });
         
+        const timeRange = booking.startTime && booking.endTime ? `${booking.startTime} — ${booking.endTime}` : '-';
+        const resourceName = booking.resourceType === 'sauna' ? 'Сауна' : (booking.resourceType === 'veranda' ? 'Веранда' : booking.resourceType);
+
         row.innerHTML = `
             <td><strong>#${booking.id}</strong></td>
             <td>${escapeHtml(booking.name)}</td>
@@ -239,6 +242,8 @@ function renderBookings(bookings) {
             </td>
             <td>${formattedDate}</td>
             <td>${languageName}</td>
+            <td>${resourceName}</td>
+            <td>${timeRange}</td>
             <td><span class="status-badge ${statusClass}">${statusText}</span></td>
             <td>
                 <div class="actions-cell">
@@ -304,6 +309,10 @@ async function editBooking(id) {
         document.getElementById('bLanguage').value = booking.language || 'ru';
         document.getElementById('bMessage').value = booking.message || '';
         document.getElementById('bConfirmed').checked = booking.confirmed === 1;
+
+        document.getElementById('bResource').value = booking.resourceType || 'sauna';
+        document.getElementById('bStartTime').value = booking.startTime || '';
+        document.getElementById('bEndTime').value = booking.endTime || '';
         
         bookingModal.classList.add('active');
     } catch (error) {
@@ -361,7 +370,10 @@ bookingForm.addEventListener('submit', async (e) => {
         bookingDate: formData.get('bookingDate'),
         language: formData.get('language'),
         message: formData.get('message') || '',
-        confirmed: formData.get('confirmed') === 'on'
+        confirmed: formData.get('confirmed') === 'on',
+        resourceType: formData.get('resource') || 'sauna',
+        startTime: formData.get('startTime') || '',
+        endTime: formData.get('endTime') || ''
     };
     
     try {

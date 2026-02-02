@@ -19,6 +19,9 @@ function initializeDatabase() {
             email TEXT NOT NULL,
             phone TEXT NOT NULL,
             bookingDate TEXT NOT NULL,
+            startTime TEXT,
+            endTime TEXT,
+            resourceType TEXT DEFAULT 'sauna',
             language TEXT DEFAULT 'ru',
             message TEXT,
             confirmed INTEGER DEFAULT 0,
@@ -37,13 +40,16 @@ function initializeDatabase() {
 function addBooking(bookingData) {
     return new Promise((resolve, reject) => {
         db.run(
-            `INSERT INTO bookings (name, email, phone, bookingDate, language, message, confirmed) 
-             VALUES (?, ?, ?, ?, ?, ?, 0)`,
+            `INSERT INTO bookings (name, email, phone, bookingDate, startTime, endTime, resourceType, language, message, confirmed) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)`,
             [
                 bookingData.name,
                 bookingData.email,
                 bookingData.phone,
                 bookingData.bookingDate,
+                bookingData.startTime || null,
+                bookingData.endTime || null,
+                bookingData.resourceType || 'sauna',
                 bookingData.language || 'ru',
                 bookingData.message || null
             ],
@@ -61,7 +67,7 @@ function addBooking(bookingData) {
 function getBookedDates() {
     return new Promise((resolve, reject) => {
         db.all(
-            `SELECT bookingDate FROM bookings 
+            `SELECT bookingDate, startTime, endTime, resourceType FROM bookings 
              WHERE confirmed = 1`,
             (err, rows) => {
                 if (err) {
@@ -138,6 +144,18 @@ function updateBooking(id, updateData) {
         if (updateData.bookingDate !== undefined) {
             fields.push('bookingDate = ?');
             values.push(updateData.bookingDate);
+        }
+        if (updateData.startTime !== undefined) {
+            fields.push('startTime = ?');
+            values.push(updateData.startTime);
+        }
+        if (updateData.endTime !== undefined) {
+            fields.push('endTime = ?');
+            values.push(updateData.endTime);
+        }
+        if (updateData.resourceType !== undefined) {
+            fields.push('resourceType = ?');
+            values.push(updateData.resourceType);
         }
         if (updateData.language !== undefined) {
             fields.push('language = ?');

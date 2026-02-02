@@ -62,7 +62,16 @@ window.translations = {
         "email": "example@mail.com",
         "phone": "Введите номер телефона",
         "message": "Напишите ваши пожелания..."
-      }
+      },
+      "resource": "Ресурс",
+      "start_time": "Время — с",
+      "end_time": "Время — до",
+      "time": {
+        "start": "ЧЧ:ММ",
+        "end": "ЧЧ:ММ"
+      },
+      "date": "ГГГГ-ММ-ДД",
+      "name": "Иван Иванов"
     },
     "footer": {
       "title": "Место силы",
@@ -81,12 +90,20 @@ window.translations = {
     "booking_failed": "Ошибка при отправке бронирования. Пожалуйста, попробуйте позже.",
     "network_error": "Проблема с подключением. Проверьте интернет-соединение.",
     "missing_fields": "Пожалуйста, заполните все обязательные поля",
-    "invalid_email": "Пожалуйста, введите корректный email адрес"
+    "invalid_email": "Пожалуйста, введите корректный email адрес",
+    "missing_time_or_resource": "Пожалуйста выберите ресурс и укажите время",
+    "invalid_time_format": "Неверный формат времени",
+    "invalid_time_range": "Время окончания должно быть позже времени начала",
+    "time_conflict": "Выбранный интервал недоступен (конфликт с другим бронированием или уборкой)",
+    "min_duration_sauna": "Минимальная длительность для сауны — 4 часа",
+    "min_duration_veranda": "Минимальная длительность для веранды — 2 часа"
     },
     "success": {
       "booking_title": "Спасибо за вашу заявку!",
       "booking_message": "Мы свяжемся с вами по номеру {phone} в течение 24 часов для подтверждения бронирования.",
-      "booking_date": "Дата посещения: {date}"
+      "booking_date": "Дата посещения: {date}",
+      "success": "✓ Успешно",
+      "success_message": "Мы получили вашу заявку. Мы свяжемся с вами по телефону {phone}"
     }
   },
   "ro": {
@@ -152,7 +169,16 @@ window.translations = {
         "email": "exemplu@mail.com",
         "phone": "Introduceți numărul de telefon",
         "message": "Scrieți dorințele dvs..."
-      }
+      },
+      "resource": "Resurs",
+      "start_time": "Începe",
+      "end_time": "Se termină",
+      "time": {
+        "start": "HH:MM",
+        "end": "HH:MM"
+      },
+      "date": "YYYY-MM-DD",
+      "name": "Ion Popescu"
     },
     "footer": {
       "title": "Loc de putere",
@@ -171,12 +197,20 @@ window.translations = {
     "booking_failed": "Eroare la trimiterea rezervării. Vă rugăm să încercați mai târziu.",
     "network_error": "Problemă de conexiune. Verificați conexiunea la internet.",
     "missing_fields": "Vă rugăm să completați toate câmpurile obligatorii",
-    "invalid_email": "Vă rugăm să introduceți o adresă de email validă"
+    "invalid_email": "Vă rugăm să introduceți o adresă de email validă",
+    "missing_time_or_resource": "Vă rugăm selectați resursa și ora",
+    "invalid_time_format": "Format de oră invalid",
+    "invalid_time_range": "Ora de sfârșit trebuie să fie după ora de început",
+    "time_conflict": "Intervalul selectat nu este disponibil (conflict)",
+    "min_duration_sauna": "Durata minimă pentru saună — 4 ore",
+    "min_duration_veranda": "Durata minimă pentru verandă — 2 ore"
     },
     "success": {
       "booking_title": "Vă mulțumim pentru cererea dumneavoastră!",
       "booking_message": "Vă vom contacta la numărul {phone} în 24 de ore pentru confirmarea rezervării.",
-      "booking_date": "Data vizitei: {date}"
+      "booking_date": "Data vizitei: {date}",
+      "success": "✓ Succes",
+      "success_message": "Am primit cererea dvs. Vă vom contacta la {phone}"
     }
   },
   "en": {
@@ -242,7 +276,16 @@ window.translations = {
         "email": "example@mail.com",
         "phone": "Enter phone number",
         "message": "Write your requests..."
-      }
+      },
+      "resource": "Resource",
+      "start_time": "Start time",
+      "end_time": "End time",
+      "time": {
+        "start": "HH:MM",
+        "end": "HH:MM"
+      },
+      "date": "YYYY-MM-DD",
+      "name": "John Doe"
     },
     "footer": {
       "title": "Place of Power",
@@ -261,12 +304,20 @@ window.translations = {
     "booking_failed": "Error submitting booking. Please try again later.",
     "network_error": "Connection problem. Please check your internet connection.",
     "missing_fields": "Please fill in all required fields",
-    "invalid_email": "Please enter a valid email address"
+    "invalid_email": "Please enter a valid email address",
+    "missing_time_or_resource": "Please choose resource and time",
+    "invalid_time_format": "Invalid time format",
+    "invalid_time_range": "End time must be after start time",
+    "time_conflict": "Selected time is not available (conflict)",
+    "min_duration_sauna": "Sauna minimum duration is 4 hours",
+    "min_duration_veranda": "Veranda minimum duration is 2 hours"
     },
     "success": {
       "booking_title": "Thank you for your booking request!",
       "booking_message": "We will contact you at {phone} within 24 hours to confirm your booking.",
-      "booking_date": "Visit date: {date}"
+      "booking_date": "Visit date: {date}",
+      "success": "✓ Success",
+      "success_message": "We got your request. We will contact you at {phone}"
     }
   }
 };

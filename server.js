@@ -83,7 +83,7 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/booked-dates', async (req, res) => {
     try {
-        console.log('[API] Booked dates requested');
+        console.log('[API] Booked dates (slots) requested');
         const bookedDates = await getBookedDates();
         res.json({ bookedDates });
     } catch (error) {
@@ -104,7 +104,9 @@ async function sendTelegramNotification(booking) {
 👤 <b>Имя:</b> ${booking.name}
 📧 <b>Email:</b> ${booking.email}
 📞 <b>Телефон:</b> ${booking.phone}
-📍 <b>Дата посещения:</b> ${booking.bookingDate}
+📍 <b>Дата:</b> ${booking.bookingDate}
+⏰ <b>Время:</b> ${booking.startTime || '-'} — ${booking.endTime || '-'}
+🏷️ <b>Ресурс:</b> ${booking.resourceType || '-'}
 🌐 <b>Язык клиента:</b> ${languageName}
 💬 <b>Пожелания:</b> ${booking.message || 'Нет'}
 
@@ -134,12 +136,38 @@ ID бронирования: #${booking.id}
     }
 }
 
+function timeToMinutes(t) {
+    const [h, m] = (t || '').split(':').map(Number);
+    return (Number.isFinite(h) && Number.isFinite(m)) ? h * 60 + m : null;
+}
+
+function hasTimeConflict(newStartMin, newEndMin, newResource, newDate, existingBookings, newId = null) {
+    for (const eb of existingBookings) {
+        if (newId && eb.id === Number(newId)) continue;
+        const ebStart = timeToMinutes(eb.startTime);
+        const ebEnd = timeToMinutes(eb.endTime);
+        if (ebStart === null || ebEnd === null) continue;
+
+        const gapExisting = eb.resourceType === 'sauna' ? 120 : 60; // in minutes
+        const gapNew = newResource === 'sauna' ? 120 : 60;
+
+        const ok1 = (ebEnd + gapExisting) <= newStartMin;
+
+        const ok2 = (newEndMin + gapNew) <= ebStart;
+
+        if (!(ok1 || ok2)) {
+            return true; 
+        }
+    }
+    return false;
+}
+
 app.post('/api/bookings', bookingLimiter, async (req, res) => {
     try {
-        console.log('[API] New booking submission:', { name: req.body.name, email: req.body.email });
-        const { name, email, phone, bookingDate, message, language } = req.body;
+        console.log('[API] New booking submission:', { name: req.body.name, email: req.body.email, resource: req.body.resourceType });
+        const { name, email, phone, bookingDate, message, language, resourceType, startTime, endTime } = req.body;
 
-        if (!name || !email || !phone || !bookingDate) {
+        if (!name || !email || !phone || !bookingDate || !startTime || !endTime || !resourceType) {
             return res.status(400).json({ errorCode: 'missing_fields' });
         }
 
@@ -152,6 +180,28 @@ app.post('/api/bookings', bookingLimiter, async (req, res) => {
             return res.status(400).json({ errorCode: 'invalid_phone' });
         }
 
+        if (!['sauna', 'veranda'].includes(resourceType)) {
+            return res.status(400).json({ errorCode: 'invalid_resource' });
+        }
+
+        const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+        if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
+            return res.status(400).json({ errorCode: 'invalid_time_format' });
+        }
+
+        const startMin = timeToMinutes(startTime);
+        const endMin = timeToMinutes(endTime);
+
+        if (startMin >= endMin) {
+            return res.status(400).json({ errorCode: 'invalid_time_range' });
+        }
+
+        const durationHours = (endMin - startMin) / 60;
+        const minHours = resourceType === 'sauna' ? 4 : 2;
+        if (durationHours < minHours) {
+            return res.status(400).json({ errorCode: resourceType === 'sauna' ? 'min_duration_sauna' : 'min_duration_veranda' });
+        }
+
         const bookingDateObj = new Date(bookingDate);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -160,11 +210,24 @@ app.post('/api/bookings', bookingLimiter, async (req, res) => {
             return res.status(400).json({ errorCode: 'past_date' });
         }
 
+        const existing = await new Promise((resolve, reject) => {
+            db.all('SELECT * FROM bookings WHERE bookingDate = ? AND resourceType = ? AND confirmed = 1', [bookingDate, resourceType], (err, rows) => {
+                if (err) reject(err); else resolve(rows || []);
+            });
+        });
+
+        if (hasTimeConflict(startMin, endMin, resourceType, bookingDate, existing)) {
+            return res.status(400).json({ errorCode: 'time_conflict' });
+        }
+
         const result = await addBooking({
             name: name.substring(0, 100),
             email: email.substring(0, 100),
             phone: phone.substring(0, 20),
             bookingDate,
+            startTime,
+            endTime,
+            resourceType,
             language: language || 'ru',
             message: message ? message.substring(0, 500) : null
         });
@@ -175,6 +238,9 @@ app.post('/api/bookings', bookingLimiter, async (req, res) => {
             email: email.substring(0, 100),
             phone: phone.substring(0, 20),
             bookingDate,
+            startTime,
+            endTime,
+            resourceType,
             language: language || 'ru',
             message: message ? message.substring(0, 500) : null
         };
@@ -245,7 +311,7 @@ app.get('/api/admin/bookings/:id', authMiddleware, async (req, res) => {
 app.put('/api/admin/bookings/:id', authMiddleware, async (req, res) => {
     try {
         console.log('[ADMIN] Booking update requested:', req.params.id);
-        const { name, email, phone, bookingDate, guests, message, confirmed } = req.body;
+        const { name, email, phone, bookingDate, guests, message, confirmed, resourceType, startTime, endTime } = req.body;
         const booking = await getBookingById(req.params.id);
 
         if (!booking) {
@@ -261,6 +327,47 @@ app.put('/api/admin/bookings/:id', authMiddleware, async (req, res) => {
         if (guests !== undefined) updateData.guests = parseInt(guests);
         if (message !== undefined) updateData.message = message ? message.substring(0, 500) : null;
         if (confirmed !== undefined) updateData.confirmed = confirmed;
+        if (resourceType !== undefined) updateData.resourceType = resourceType;
+        if (startTime !== undefined) updateData.startTime = startTime;
+        if (endTime !== undefined) updateData.endTime = endTime;
+
+        if (updateData.confirmed === 1 || updateData.startTime !== undefined || updateData.endTime !== undefined || updateData.resourceType !== undefined || updateData.bookingDate !== undefined) {
+            const newResource = updateData.resourceType || booking.resourceType;
+            const newStart = updateData.startTime || booking.startTime;
+            const newEnd = updateData.endTime || booking.endTime;
+            const newDate = updateData.bookingDate || booking.bookingDate;
+
+            if (!newStart || !newEnd || !newResource) {
+                return res.status(400).json({ error: 'Missing resource/time for validation' });
+            }
+
+            const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+            if (!timeRegex.test(newStart) || !timeRegex.test(newEnd)) {
+                return res.status(400).json({ errorCode: 'invalid_time_format' });
+            }
+
+            const startMin = timeToMinutes(newStart);
+            const endMin = timeToMinutes(newEnd);
+            if (startMin >= endMin) {
+                return res.status(400).json({ errorCode: 'invalid_time_range' });
+            }
+
+            const durationHours = (endMin - startMin) / 60;
+            const minHours = newResource === 'sauna' ? 4 : 2;
+            if (durationHours < minHours) {
+                return res.status(400).json({ errorCode: newResource === 'sauna' ? 'min_duration_sauna' : 'min_duration_veranda' });
+            }
+
+            const existing = await new Promise((resolve, reject) => {
+                db.all('SELECT * FROM bookings WHERE bookingDate = ? AND resourceType = ? AND confirmed = 1', [newDate, newResource], (err, rows) => {
+                    if (err) reject(err); else resolve(rows || []);
+                });
+            });
+
+            if (hasTimeConflict(startMin, endMin, newResource, newDate, existing, req.params.id)) {
+                return res.status(400).json({ errorCode: 'time_conflict' });
+            }
+        }
 
         const result = await updateBooking(req.params.id, updateData);
         console.log('[ADMIN] Booking updated:', req.params.id);
